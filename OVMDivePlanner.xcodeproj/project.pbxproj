@@ -6,17 +6,38 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		68948E0D2F868B09008AB2E2 /* project.yml in Resources */ = {isa = PBXBuildFile; fileRef = 68948E0B2F868B09008AB2E2 /* project.yml */; };
+		68948E0E2F868B09008AB2E2 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 68948E0C2F868B09008AB2E2 /* README.md */; };
+		68948E0F2F868B09008AB2E2 /* DivePlannerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68948E012F868B09008AB2E2 /* DivePlannerViewModel.swift */; };
+		68948E102F868B09008AB2E2 /* ResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68948E062F868B09008AB2E2 /* ResultsView.swift */; };
+		68948E112F868B09008AB2E2 /* DivePlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68948DFB2F868B09008AB2E2 /* DivePlanner.swift */; };
+		68948E122F868B09008AB2E2 /* BuhlmannEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68948DFA2F868B09008AB2E2 /* BuhlmannEngine.swift */; };
+		68948E132F868B09008AB2E2 /* PlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68948E042F868B09008AB2E2 /* PlannerView.swift */; };
+		68948E142F868B09008AB2E2 /* RepetitiveDiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68948E052F868B09008AB2E2 /* RepetitiveDiveView.swift */; };
+		68948E152F868B09008AB2E2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68948E032F868B09008AB2E2 /* ContentView.swift */; };
+		68948E162F868B09008AB2E2 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68948E072F868B09008AB2E2 /* SettingsView.swift */; };
+		68948E172F868B09008AB2E2 /* OVMDivePlannerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68948E092F868B09008AB2E2 /* OVMDivePlannerApp.swift */; };
+		68948E182F868B09008AB2E2 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68948DFD2F868B09008AB2E2 /* Models.swift */; };
+		68948E192F868B09008AB2E2 /* SharedComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68948DFF2F868B09008AB2E2 /* SharedComponents.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		686DBE102F8675AF000D23C2 /* OVMDivePlanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OVMDivePlanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		68948DFA2F868B09008AB2E2 /* BuhlmannEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuhlmannEngine.swift; sourceTree = "<group>"; };
+		68948DFB2F868B09008AB2E2 /* DivePlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DivePlanner.swift; sourceTree = "<group>"; };
+		68948DFD2F868B09008AB2E2 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		68948DFF2F868B09008AB2E2 /* SharedComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedComponents.swift; sourceTree = "<group>"; };
+		68948E012F868B09008AB2E2 /* DivePlannerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DivePlannerViewModel.swift; sourceTree = "<group>"; };
+		68948E032F868B09008AB2E2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		68948E042F868B09008AB2E2 /* PlannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlannerView.swift; sourceTree = "<group>"; };
+		68948E052F868B09008AB2E2 /* RepetitiveDiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepetitiveDiveView.swift; sourceTree = "<group>"; };
+		68948E062F868B09008AB2E2 /* ResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsView.swift; sourceTree = "<group>"; };
+		68948E072F868B09008AB2E2 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		68948E092F868B09008AB2E2 /* OVMDivePlannerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OVMDivePlannerApp.swift; sourceTree = "<group>"; };
+		68948E0B2F868B09008AB2E2 /* project.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = project.yml; sourceTree = "<group>"; };
+		68948E0C2F868B09008AB2E2 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		686DBE122F8675AF000D23C2 /* OVMDivePlanner */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = OVMDivePlanner;
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		686DBE0D2F8675AF000D23C2 /* Frameworks */ = {
@@ -32,7 +53,9 @@
 		686DBE072F8675AF000D23C2 = {
 			isa = PBXGroup;
 			children = (
-				686DBE122F8675AF000D23C2 /* OVMDivePlanner */,
+				68948E0A2F868B09008AB2E2 /* OVMDivePlanner */,
+				68948E0B2F868B09008AB2E2 /* project.yml */,
+				68948E0C2F868B09008AB2E2 /* README.md */,
 				686DBE112F8675AF000D23C2 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -43,6 +66,64 @@
 				686DBE102F8675AF000D23C2 /* OVMDivePlanner.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		68948DFC2F868B09008AB2E2 /* Engine */ = {
+			isa = PBXGroup;
+			children = (
+				68948DFA2F868B09008AB2E2 /* BuhlmannEngine.swift */,
+				68948DFB2F868B09008AB2E2 /* DivePlanner.swift */,
+			);
+			path = Engine;
+			sourceTree = "<group>";
+		};
+		68948DFE2F868B09008AB2E2 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				68948DFD2F868B09008AB2E2 /* Models.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		68948E002F868B09008AB2E2 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				68948DFF2F868B09008AB2E2 /* SharedComponents.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		68948E022F868B09008AB2E2 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				68948E012F868B09008AB2E2 /* DivePlannerViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		68948E082F868B09008AB2E2 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				68948E032F868B09008AB2E2 /* ContentView.swift */,
+				68948E042F868B09008AB2E2 /* PlannerView.swift */,
+				68948E052F868B09008AB2E2 /* RepetitiveDiveView.swift */,
+				68948E062F868B09008AB2E2 /* ResultsView.swift */,
+				68948E072F868B09008AB2E2 /* SettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		68948E0A2F868B09008AB2E2 /* OVMDivePlanner */ = {
+			isa = PBXGroup;
+			children = (
+				68948DFC2F868B09008AB2E2 /* Engine */,
+				68948DFE2F868B09008AB2E2 /* Models */,
+				68948E002F868B09008AB2E2 /* Utils */,
+				68948E022F868B09008AB2E2 /* ViewModels */,
+				68948E082F868B09008AB2E2 /* Views */,
+				68948E092F868B09008AB2E2 /* OVMDivePlannerApp.swift */,
+			);
+			path = OVMDivePlanner;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -59,9 +140,6 @@
 			buildRules = (
 			);
 			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				686DBE122F8675AF000D23C2 /* OVMDivePlanner */,
 			);
 			name = OVMDivePlanner;
 			packageProductDependencies = (
@@ -109,6 +187,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				68948E0D2F868B09008AB2E2 /* project.yml in Resources */,
+				68948E0E2F868B09008AB2E2 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -119,6 +199,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				68948E0F2F868B09008AB2E2 /* DivePlannerViewModel.swift in Sources */,
+				68948E102F868B09008AB2E2 /* ResultsView.swift in Sources */,
+				68948E112F868B09008AB2E2 /* DivePlanner.swift in Sources */,
+				68948E122F868B09008AB2E2 /* BuhlmannEngine.swift in Sources */,
+				68948E132F868B09008AB2E2 /* PlannerView.swift in Sources */,
+				68948E142F868B09008AB2E2 /* RepetitiveDiveView.swift in Sources */,
+				68948E152F868B09008AB2E2 /* ContentView.swift in Sources */,
+				68948E162F868B09008AB2E2 /* SettingsView.swift in Sources */,
+				68948E172F868B09008AB2E2 /* OVMDivePlannerApp.swift in Sources */,
+				68948E182F868B09008AB2E2 /* Models.swift in Sources */,
+				68948E192F868B09008AB2E2 /* SharedComponents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -261,6 +352,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -293,6 +385,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

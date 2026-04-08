@@ -1,9 +1,5 @@
-//
-//  OVMDivePlannerApp.swift
-//  OVMDivePlanner
-//
-//  Created by Ferry Ouwerkerk on 08/04/2026.
-//
+// OVMDivePlannerApp.swift
+// App entry point
 
 import SwiftUI
 

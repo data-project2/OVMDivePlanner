@@ -1,0 +1,216 @@
+// ResultsView.swift
+// Displays decompression schedule and summary for dive 1 (and dive 2 if repetitive)
+
+import SwiftUI
+
+struct ResultsView: View {
+    @EnvironmentObject private var vm: DivePlannerViewModel
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if vm.isCalculating {
+                    VStack(spacing: 16) {
+                        ProgressView("Calculating…")
+                        Text("Running Bühlmann ZHL-16C").foregroundStyle(.secondary).font(.caption)
+                    }
+                } else if let r = vm.results {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 20) {
+                            if !r.warnings.isEmpty { WarningsBox(warnings: r.warnings) }
+                            DiveResultCard(title: "Dive 1", result: r)
+                            if let r2 = vm.results2 {
+                                Divider()
+                                if !r2.warnings.isEmpty { WarningsBox(warnings: r2.warnings) }
+                                DiveResultCard(title: "Dive 2", result: r2)
+                            }
+                        }
+                        .padding()
+                    }
+                } else {
+                    VStack(spacing: 12) {
+                        Image(systemName: "figure.open.water.swim")
+                            .font(.system(size: 56))
+                            .foregroundStyle(.cyan.opacity(0.6))
+                        Text("No results yet")
+                            .font(.title3).foregroundStyle(.secondary)
+                        Text("Configure your dive and tap Calculate Decompression in the Plan tab.")
+                            .font(.caption).foregroundStyle(.tertiary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
+                }
+            }
+            .navigationTitle("Schedule")
+        }
+    }
+}
+
+// MARK: - Warning box
+
+struct WarningsBox: View {
+    let warnings: [String]
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Label("Warnings", systemImage: "exclamationmark.triangle.fill")
+                .foregroundStyle(.orange)
+                .font(.headline)
+            ForEach(warnings, id: \.self) { w in
+                HStack(alignment: .top, spacing: 6) {
+                    Text("•")
+                    Text(w).font(.callout)
+                }
+            }
+        }
+        .padding()
+        .background(Color.orange.opacity(0.12))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+    }
+}
+
+// MARK: - Card per dive
+
+struct DiveResultCard: View {
+    let title: String
+    let result: DiveResultData
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text(title).font(.title2.bold())
+
+            // Summary grid
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                SummaryCell(label: "Max Depth", value: "\(Int(result.maxDepth)) m")
+                SummaryCell(label: "Bottom Runtime", value: "\(fmtMin(result.bottomRuntime))")
+                SummaryCell(label: "Total Runtime", value: "\(fmtMin(result.totalRuntime))")
+                SummaryCell(label: "Total Stop Time", value: "\(fmtMin(result.totalStopTime))")
+                SummaryCell(label: "First Stop", value: result.schedule.isEmpty ? "No deco" : "\(Int(result.firstStopDepth)) m")
+                SummaryCell(label: "Avg Depth", value: "\(result.averageDepth) m")
+                SummaryCell(label: "CNS%", value: String(format: "%.1f%%", result.cnsPct), highlight: result.cnsPct >= 80)
+                SummaryCell(label: "OTU", value: String(format: "%.0f", result.otuTotal), highlight: result.otuTotal >= 280)
+            }
+
+            // Deco schedule
+            if !result.schedule.isEmpty {
+                Text("Decompression Schedule").font(.headline)
+                DecoTable(stops: result.schedule)
+            } else {
+                Label("No decompression required", systemImage: "checkmark.circle")
+                    .foregroundStyle(.green)
+            }
+
+            // Gas usage
+            if !result.gasUsage.isEmpty {
+                Text("Gas Usage (litres)").font(.headline)
+                ForEach(result.gasUsage, id: \.label) { g in
+                    HStack {
+                        Text(g.label)
+                        Spacer()
+                        Text(String(format: "%.0f L", g.litres)).bold()
+                    }
+                    .padding(.vertical, 2)
+                }
+            }
+
+            // Bailout (CCR only)
+            if let bo = result.bailout {
+                BailoutSection(bo: bo)
+            }
+        }
+    }
+
+    func fmtMin(_ m: Double) -> String {
+        let total = Int(m)
+        let h = total / 60; let mn = total % 60
+        return h > 0 ? "\(h)h \(mn)min" : "\(mn) min"
+    }
+}
+
+struct SummaryCell: View {
+    let label: String
+    let value: String
+    var highlight: Bool = false
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label).font(.caption).foregroundStyle(.secondary)
+            Text(value).font(.headline).foregroundStyle(highlight ? .red : .primary)
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+}
+
+// MARK: - Deco table
+
+struct DecoTable: View {
+    let stops: [DecoStop]
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text("Depth").font(.caption.bold()).frame(maxWidth: .infinity)
+                Text("Stop").font(.caption.bold()).frame(maxWidth: .infinity)
+                Text("Runtime").font(.caption.bold()).frame(maxWidth: .infinity)
+                Text("Gas").font(.caption.bold()).frame(maxWidth: .infinity)
+            }
+            .padding(.vertical, 6)
+            .background(Color.cyan.opacity(0.2))
+
+            ForEach(stops, id: \.depth) { s in
+                HStack {
+                    Text("\(Int(s.depth)) m").frame(maxWidth: .infinity)
+                    Text("\(Int(s.stopTime)) min").frame(maxWidth: .infinity)
+                    Text("\(Int(s.runtime)) min").frame(maxWidth: .infinity)
+                    Text(s.gas).frame(maxWidth: .infinity).lineLimit(1).minimumScaleFactor(0.7)
+                }
+                .padding(.vertical, 4)
+                Divider()
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.secondary.opacity(0.3)))
+    }
+}
+
+// MARK: - Bailout section
+
+struct BailoutSection: View {
+    let bo: BailoutResultData
+    @State private var expanded = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Button(action: { expanded.toggle() }) {
+                HStack {
+                    Label("CCR Bailout Schedule", systemImage: "arrow.triangle.2.circlepath")
+                        .font(.headline)
+                    Spacer()
+                    Image(systemName: expanded ? "chevron.up" : "chevron.down")
+                }
+            }
+            .buttonStyle(.plain)
+
+            if expanded {
+                if !bo.warnings.isEmpty { WarningsBox(warnings: bo.warnings) }
+
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                    SummaryCell(label: "Runtime", value: "\(Int(bo.totalRuntime)) min")
+                    SummaryCell(label: "Stop Time", value: "\(Int(bo.totalStopTime)) min")
+                    SummaryCell(label: "Avg Depth", value: "\(bo.averageDepth) m")
+                    SummaryCell(label: "CNS%", value: String(format: "%.1f%%", bo.cnsPct), highlight: bo.cnsPct >= 80)
+                }
+
+                if !bo.schedule.isEmpty { DecoTable(stops: bo.schedule) }
+                if !bo.gasUsage.isEmpty {
+                    ForEach(bo.gasUsage, id: \.label) { g in
+                        HStack { Text(g.label); Spacer(); Text(String(format: "%.0f L", g.litres)).bold() }
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+    }
+}
