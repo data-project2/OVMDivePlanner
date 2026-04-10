@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		686BB34C2F8918FE0056FB17 /* appstore.png in Resources */ = {isa = PBXBuildFile; fileRef = 686BB34B2F8918FE0056FB17 /* appstore.png */; };
+		686BB35D2F89514F0056FB17 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 686BB35C2F89514F0056FB17 /* Assets.xcassets */; };
 		68948E0D2F868B09008AB2E2 /* project.yml in Resources */ = {isa = PBXBuildFile; fileRef = 68948E0B2F868B09008AB2E2 /* project.yml */; };
 		68948E0E2F868B09008AB2E2 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 68948E0C2F868B09008AB2E2 /* README.md */; };
 		68948E0F2F868B09008AB2E2 /* DivePlannerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68948E012F868B09008AB2E2 /* DivePlannerViewModel.swift */; };
@@ -23,8 +24,20 @@
 		68948E192F868B09008AB2E2 /* SharedComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68948DFF2F868B09008AB2E2 /* SharedComponents.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		686BB3552F894B3F0056FB17 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 686DBE082F8675AF000D23C2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 686DBE0F2F8675AF000D23C2;
+			remoteInfo = OVMDivePlanner;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		686BB34B2F8918FE0056FB17 /* appstore.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = appstore.png; sourceTree = "<group>"; };
+		686BB3512F894B3F0056FB17 /* OVMDivePlannerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OVMDivePlannerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		686BB35C2F89514F0056FB17 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		686DBE102F8675AF000D23C2 /* OVMDivePlanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OVMDivePlanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		68948DFA2F868B09008AB2E2 /* BuhlmannEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuhlmannEngine.swift; sourceTree = "<group>"; };
 		68948DFB2F868B09008AB2E2 /* DivePlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DivePlanner.swift; sourceTree = "<group>"; };
@@ -41,7 +54,22 @@
 		68948E0C2F868B09008AB2E2 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		686BB3522F894B3F0056FB17 /* OVMDivePlannerTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = OVMDivePlannerTests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
+		686BB34E2F894B3F0056FB17 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		686DBE0D2F8675AF000D23C2 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -59,6 +87,7 @@
 				68948E0B2F868B09008AB2E2 /* project.yml */,
 				68948E0C2F868B09008AB2E2 /* README.md */,
 				686BB34B2F8918FE0056FB17 /* appstore.png */,
+				686BB3522F894B3F0056FB17 /* OVMDivePlannerTests */,
 				686DBE112F8675AF000D23C2 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -67,6 +96,7 @@
 			isa = PBXGroup;
 			children = (
 				686DBE102F8675AF000D23C2 /* OVMDivePlanner.app */,
+				686BB3512F894B3F0056FB17 /* OVMDivePlannerTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -119,6 +149,7 @@
 		68948E0A2F868B09008AB2E2 /* OVMDivePlanner */ = {
 			isa = PBXGroup;
 			children = (
+				686BB35C2F89514F0056FB17 /* Assets.xcassets */,
 				68948DFC2F868B09008AB2E2 /* Engine */,
 				68948DFE2F868B09008AB2E2 /* Models */,
 				68948E002F868B09008AB2E2 /* Utils */,
@@ -132,6 +163,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		686BB3502F894B3F0056FB17 /* OVMDivePlannerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 686BB3592F894B3F0056FB17 /* Build configuration list for PBXNativeTarget "OVMDivePlannerTests" */;
+			buildPhases = (
+				686BB34D2F894B3F0056FB17 /* Sources */,
+				686BB34E2F894B3F0056FB17 /* Frameworks */,
+				686BB34F2F894B3F0056FB17 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				686BB3562F894B3F0056FB17 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				686BB3522F894B3F0056FB17 /* OVMDivePlannerTests */,
+			);
+			name = OVMDivePlannerTests;
+			packageProductDependencies = (
+			);
+			productName = OVMDivePlannerTests;
+			productReference = 686BB3512F894B3F0056FB17 /* OVMDivePlannerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		686DBE0F2F8675AF000D23C2 /* OVMDivePlanner */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 686DBE1B2F8675B0000D23C2 /* Build configuration list for PBXNativeTarget "OVMDivePlanner" */;
@@ -161,6 +215,10 @@
 				LastSwiftUpdateCheck = 2640;
 				LastUpgradeCheck = 2640;
 				TargetAttributes = {
+					686BB3502F894B3F0056FB17 = {
+						CreatedOnToolsVersion = 26.4;
+						TestTargetID = 686DBE0F2F8675AF000D23C2;
+					};
 					686DBE0F2F8675AF000D23C2 = {
 						CreatedOnToolsVersion = 26.4;
 					};
@@ -181,17 +239,26 @@
 			projectRoot = "";
 			targets = (
 				686DBE0F2F8675AF000D23C2 /* OVMDivePlanner */,
+				686BB3502F894B3F0056FB17 /* OVMDivePlannerTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		686BB34F2F894B3F0056FB17 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		686DBE0E2F8675AF000D23C2 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				68948E0D2F868B09008AB2E2 /* project.yml in Resources */,
 				686BB34C2F8918FE0056FB17 /* appstore.png in Resources */,
+				686BB35D2F89514F0056FB17 /* Assets.xcassets in Resources */,
 				68948E0E2F868B09008AB2E2 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -199,6 +266,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		686BB34D2F894B3F0056FB17 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		686DBE0C2F8675AF000D23C2 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -219,7 +293,57 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		686BB3562F894B3F0056FB17 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 686DBE0F2F8675AF000D23C2 /* OVMDivePlanner */;
+			targetProxy = 686BB3552F894B3F0056FB17 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		686BB3572F894B3F0056FB17 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DKA242B3QX;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ovm.OVMDivePlanner.OVMDivePlannerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OVMDivePlanner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/OVMDivePlanner";
+			};
+			name = Debug;
+		};
+		686BB3582F894B3F0056FB17 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DKA242B3QX;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ovm.OVMDivePlanner.OVMDivePlannerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OVMDivePlanner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/OVMDivePlanner";
+			};
+			name = Release;
+		};
 		686DBE192F8675B0000D23C2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -414,6 +538,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		686BB3592F894B3F0056FB17 /* Build configuration list for PBXNativeTarget "OVMDivePlannerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				686BB3572F894B3F0056FB17 /* Debug */,
+				686BB3582F894B3F0056FB17 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		686DBE0B2F8675AF000D23C2 /* Build configuration list for PBXProject "OVMDivePlanner" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

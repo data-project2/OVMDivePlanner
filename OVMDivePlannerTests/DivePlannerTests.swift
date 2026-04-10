@@ -1,0 +1,67 @@
+import XCTest
+@testable import OVMDivePlanner
+
+final class DivePlannerTests: XCTestCase {
+    func testDepthPressureRoundTrip() {
+        let pressure = depthToPressure(30, 1.0, 1.025)
+        XCTAssertEqual(pressureToDepth(pressure, 1.0, 1.025), 30, accuracy: 0.0001)
+    }
+
+    func testBestGasChoosesHighestSafeOxygenAtDepth() {
+        let gases = [
+            PreparedGas(fO2: 0.50, fHe: 0, fN2: 0.50, mod: 21, label: "EAN50"),
+            PreparedGas(fO2: 1.00, fHe: 0, fN2: 0.00, mod: 6, label: "O2")
+        ]
+
+        let gasAt21 = bestGasAtDepth(gases, 21, (fO2: 0.21, fHe: 0))
+        let gasAt6 = bestGasAtDepth(gases, 6, (fO2: 0.21, fHe: 0))
+
+        XCTAssertEqual(gasAt21.fO2, 0.50, accuracy: 0.0001)
+        XCTAssertEqual(gasAt6.fO2, 1.00, accuracy: 0.0001)
+    }
+
+    func testNoDecoRecreationalDiveProducesFiniteRuntime() {
+        let input = DivePlanInput(
+            levels: [DiveLevel(depth: 18, time: 20)],
+            ascentRate: 9,
+            transitInclusive: false,
+            bottomGas: .air,
+            surfacePressure: 1.0,
+            gfLow: 35,
+            gfHigh: 70,
+            lastStopDepth: 6
+        )
+
+        let result = planDive(input: input)
+
+        XCTAssertTrue(result.totalRuntime > 0)
+        XCTAssertFalse(result.warnings.contains { $0.contains("exceeded 999") })
+    }
+
+    func testCCRBailoutDoesNotRunAwayAtLastStop() {
+        let input = DivePlanInput(
+            circuitType: .ccr,
+            levels: [DiveLevel(depth: 40, time: 25)],
+            ascentRate: 9,
+            transitInclusive: false,
+            bottomGas: .air,
+            decoGases: [
+                GasMix(fO2: 0.50, fHe: 0),
+                GasMix(fO2: 1.00, fHe: 0)
+            ],
+            surfacePressure: 1.0,
+            gfLow: 35,
+            gfHigh: 70,
+            lastStopDepth: 6,
+            setpointHigh: 1.3,
+            setpointSwitchDepth: 6,
+            setpointDeco: 1.6,
+            diluent: .air
+        )
+
+        let result = planDive(input: input)
+
+        XCTAssertFalse(result.bailout?.warnings.contains { $0.contains("exceeded 999") } ?? true)
+        XCTAssertLessThan(result.bailout?.totalRuntime ?? 1_000, 1_000)
+    }
+}
