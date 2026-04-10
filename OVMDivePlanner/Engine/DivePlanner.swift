@@ -230,7 +230,9 @@ func planDive(input: DivePlanInput, initialTissues: TissueState? = nil,
         applySegDepthChange(currentDepth, stepEnd, input.ascentRate, "ascent_deco")
         runtime += stepTime
         let midD = (currentDepth + stepEnd) / 2
-        addUsage(botLabel, midD, stepTime, input.sacDeco)
+        let ascentGas = getGas(depthToPressure(midD, surfP, wdf), midD, "ascent_deco")
+
+        addUsage(gasLabelFor(ascentGas.fO2, ascentGas.fHe, midD), midD, stepTime, input.sacDeco)
         trackSeg(midD, stepTime, ppO2At(midD, "ascent_deco"))
         currentDepth = stepEnd
     }
@@ -255,7 +257,9 @@ func planDive(input: DivePlanInput, initialTissues: TissueState? = nil,
             var stopTime = 0.0
 
             while true {
-                let ceilBar = tissues.ceiling(gf: gf)
+                let clearanceGF = isLast ? gfH : gf
+
+                let ceilBar = tissues.ceiling(gf: clearanceGF)
                 let ceilD = pressureToDepth(ceilBar, surfP, wdf)
                 let reqStop = ceilToStop(max(0, ceilD))
                 if isLast ? reqStop <= 0 : reqStop < sd { break }
@@ -439,7 +443,9 @@ func computeBailout(tissues: TissueState, depth: Double, preparedDeco: [Prepared
             var stopTime = 0.0
 
             while true {
-                let ceilD = pressureToDepth(tissues.ceiling(gf: gf), surfP, wdf)
+                let clearanceGF = isLast ? gfH : gf
+
+                let ceilD = pressureToDepth(tissues.ceiling(gf: clearanceGF), surfP, wdf)
                 let req = ceilToStop(max(0, ceilD))
                 if isLast ? req <= 0 : req < sd { break }
                 tissues.applyConstant(ambient: pStop, fN2: g.fN2, fHe: g.fHe, time: 1)

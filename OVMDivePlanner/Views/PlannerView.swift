@@ -39,7 +39,7 @@ struct PlannerView: View {
                 }
 
                 // Bottom gas
-                Section("Bottom Gas") {
+                Section(vm.circuitType == .ccr ? "Diluent Gas" : "Bottom Gas") {
                     GasPickerRow(gas: $vm.bottomGas, showSwitch: false)
                 }
 
@@ -165,11 +165,13 @@ struct GasPickerRow: View {
                         .keyboardType(.decimalPad)
                         .focused($focusedField, equals: .oxygen)
                         .submitLabel(.done)
+                        .onChange(of: o2Str) { _ in updateGas() }
                     Text("He%").frame(width: 36)
                     TextField("0", text: $heStr)
                         .keyboardType(.decimalPad)
                         .focused($focusedField, equals: .helium)
                         .submitLabel(.done)
+                        .onChange(of: heStr) { _ in updateGas() }
                 }
                 .textFieldStyle(.roundedBorder)
                 .frame(maxWidth: .infinity)
@@ -185,6 +187,7 @@ struct GasPickerRow: View {
                         .frame(width: 70)
                         .focused($focusedField, equals: .switchDepth)
                         .submitLabel(.done)
+                        .onChange(of: swStr) { _ in updateGas() }
                 }
             }
         }
@@ -201,6 +204,8 @@ struct GasPickerRow: View {
     }
 
     private func syncFromGas() {
+        guard focusedField == nil else { return }
+
         let nextO2 = String(format: "%.0f", gas.fO2 * 100)
         let nextHe = String(format: "%.0f", gas.fHe * 100)
         let nextSwitchDepth = gas.switchDepth.map { String(format: "%.0f", $0) } ?? ""
@@ -271,9 +276,6 @@ struct CCRSettingsSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Diluent Gas") {
-                    GasPickerRow(gas: $vm.diluent, showSwitch: false)
-                }
                 Section("Setpoints (bar ppO₂)") {
                     LabeledSlider(label: "Low setpoint", value: $vm.setpointLow, range: 0.4...1.6, step: 0.05,
                                   format: "%.2f bar")

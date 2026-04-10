@@ -27,7 +27,7 @@ struct RepetitiveDiveView: View {
             }
 
             // Dive 2 bottom gas
-            Text("Dive 2 Bottom Gas").font(.subheadline).foregroundStyle(.secondary)
+            Text(vm.circuitType == .ccr ? "Dive 2 Diluent Gas" : "Dive 2 Bottom Gas").font(.subheadline).foregroundStyle(.secondary)
             GasPickerRow(gas: $vm.bottomGas2, showSwitch: false)
 
             // Dive 2 deco gases (OC only)

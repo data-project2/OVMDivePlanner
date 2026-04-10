@@ -18,11 +18,11 @@ struct ResultsView: View {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 20) {
                             if !r.warnings.isEmpty { WarningsBox(warnings: r.warnings) }
-                            DiveResultCard(title: "Dive 1", result: r)
+                            DiveResultCard(title: "Dive 1", levels: vm.levels, result: r)
                             if let r2 = vm.results2 {
                                 Divider()
                                 if !r2.warnings.isEmpty { WarningsBox(warnings: r2.warnings) }
-                                DiveResultCard(title: "Dive 2", result: r2)
+                                DiveResultCard(title: "Dive 2", levels: vm.levels2, result: r2)
                             }
                         }
                         .padding()
@@ -72,6 +72,8 @@ struct WarningsBox: View {
 
 struct DiveResultCard: View {
     let title: String
+    let levels: [DiveLevel]
+
     let result: DiveResultData
 
     var body: some View {
@@ -88,6 +90,11 @@ struct DiveResultCard: View {
                 SummaryCell(label: "Avg Depth", value: "\(result.averageDepth) m")
                 SummaryCell(label: "CNS%", value: String(format: "%.1f%%", result.cnsPct), highlight: result.cnsPct >= 80)
                 SummaryCell(label: "OTU", value: String(format: "%.0f", result.otuTotal), highlight: result.otuTotal >= 280)
+            }
+
+            if !levels.isEmpty {
+                Text("Dive Profile").font(.headline)
+                DiveProfileTable(levels: levels)
             }
 
             // Deco schedule
@@ -139,6 +146,40 @@ struct SummaryCell: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+}
+
+struct DiveProfileTable: View {
+    let levels: [DiveLevel]
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text("Level").font(.caption.bold()).frame(maxWidth: .infinity)
+                Text("Depth").font(.caption.bold()).frame(maxWidth: .infinity)
+                Text("Time").font(.caption.bold()).frame(maxWidth: .infinity)
+                Text("Runtime").font(.caption.bold()).frame(maxWidth: .infinity)
+            }
+            .padding(.vertical, 6)
+            .background(Color.blue.opacity(0.16))
+
+            ForEach(Array(levels.enumerated()), id: \.element.id) { index, level in
+                HStack {
+                    Text("\(index + 1)").frame(maxWidth: .infinity)
+                    Text("\(Int(level.depth)) m").frame(maxWidth: .infinity)
+                    Text("\(Int(level.time)) min").frame(maxWidth: .infinity)
+                    Text("\(Int(runtimeThroughLevel(at: index))) min").frame(maxWidth: .infinity)
+                }
+                .padding(.vertical, 4)
+                Divider()
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.secondary.opacity(0.3)))
+    }
+
+    private func runtimeThroughLevel(at index: Int) -> Double {
+        levels.prefix(index + 1).reduce(0) { $0 + $1.time }
     }
 }
 

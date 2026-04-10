@@ -119,7 +119,7 @@ class DivePlannerViewModel: ObservableObject {
             setpointHigh: setpointHigh,
             setpointSwitchDepth: setpointSwitchDepth,
             setpointDeco: setpointDeco,
-            diluent: diluent
+            diluent: isSecond ? bottomGas2 : bottomGas
         )
     }
 }
