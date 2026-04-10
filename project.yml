@@ -22,12 +22,16 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.ovmdiver.OVMDivePlanner
         INFOPLIST_FILE: OVMDivePlanner/Info.plist
-        DEVELOPMENT_TEAM: "OVM"
+        DEVELOPMENT_TEAM: ""
     info:
       path: OVMDivePlanner/Info.plist
       properties:
         CFBundleDisplayName: OVM Dive Planner
-        CFBundleV
+        CFBundleVersion: "1"
+        CFBundleShortVersionString: "1.0"
+        UILaunchScreen:
+          UIColorName: ""
+        UISupportedInterfaceOrientations:
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
         UISupportedInterfaceOrientations~ipad:
