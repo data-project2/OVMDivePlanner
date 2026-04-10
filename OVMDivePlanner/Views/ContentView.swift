@@ -20,6 +20,8 @@ struct ContentView: View {
                 .tabItem { Label("Settings", systemImage: "gearshape") }
         }
         .environmentObject(vm)
-        .tint(.cyan)
+        .tint(OVMTheme.accent)
+        .background(OVMTheme.background)
+        .preferredColorScheme(.dark)
     }
 }

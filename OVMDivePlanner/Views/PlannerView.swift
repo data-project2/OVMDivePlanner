@@ -89,6 +89,7 @@ struct PlannerView: View {
                     .disabled(vm.isCalculating)
                 }
             }
+            .ovmFormBackground()
             .navigationTitle("OVM Dive Planner")
         }
         .sheet(isPresented: $showCCRSettings) {
@@ -104,12 +105,12 @@ struct LevelRow: View {
     @Binding var level: DiveLevel
     var body: some View {
         HStack {
-            Text("Depth (m)").foregroundStyle(.secondary).frame(width: 80, alignment: .leading)
+            Text("Depth (m)").foregroundStyle(OVMTheme.textSecondary).frame(width: 80, alignment: .leading)
             TextField("0", value: $level.depth, format: .number)
                 .keyboardType(.decimalPad)
                 .multilineTextAlignment(.trailing)
             Spacer().frame(width: 24)
-            Text("Time (min)").foregroundStyle(.secondary).frame(width: 80, alignment: .leading)
+            Text("Time (min)").foregroundStyle(OVMTheme.textSecondary).frame(width: 80, alignment: .leading)
             TextField("0", value: $level.time, format: .number)
                 .keyboardType(.decimalPad)
                 .multilineTextAlignment(.trailing)
@@ -179,7 +180,7 @@ struct GasPickerRow: View {
 
             if showSwitch {
                 HStack {
-                    Text("Switch depth (m, blank = auto)").foregroundStyle(.secondary).font(.caption)
+                    Text("Switch depth (m, blank = auto)").foregroundStyle(OVMTheme.textSecondary).font(.caption)
                     Spacer()
                     TextField("auto", text: $swStr)
                         .keyboardType(.decimalPad)
@@ -296,6 +297,7 @@ struct CCRSettingsSheet: View {
                     Button(action: vm.addDecoGas) { Label("Add Gas", systemImage: "plus.circle") }
                 }
             }
+            .ovmFormBackground()
             .navigationTitle("CCR Settings")
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
         }

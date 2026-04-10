@@ -12,7 +12,7 @@ struct ResultsView: View {
                 if vm.isCalculating {
                     VStack(spacing: 16) {
                         ProgressView("Calculating…")
-                        Text("Running Bühlmann ZHL-16C").foregroundStyle(.secondary).font(.caption)
+                        Text("Running Bühlmann ZHL-16C").foregroundStyle(OVMTheme.textSecondary).font(.caption)
                     }
                 } else if let r = vm.results {
                     ScrollView {
@@ -31,17 +31,18 @@ struct ResultsView: View {
                     VStack(spacing: 12) {
                         Image(systemName: "figure.open.water.swim")
                             .font(.system(size: 56))
-                            .foregroundStyle(.cyan.opacity(0.6))
+                            .foregroundStyle(OVMTheme.accent.opacity(0.6))
                         Text("No results yet")
-                            .font(.title3).foregroundStyle(.secondary)
+                            .font(.title3).foregroundStyle(OVMTheme.textSecondary)
                         Text("Configure your dive and tap Calculate Decompression in the Plan tab.")
-                            .font(.caption).foregroundStyle(.tertiary)
+                            .font(.caption).foregroundStyle(OVMTheme.textTertiary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                     }
                 }
             }
             .navigationTitle("Schedule")
+            .background(OVMTheme.background)
         }
     }
 }
@@ -53,7 +54,7 @@ struct WarningsBox: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Label("Warnings", systemImage: "exclamationmark.triangle.fill")
-                .foregroundStyle(.orange)
+                .foregroundStyle(OVMTheme.danger)
                 .font(.headline)
             ForEach(warnings, id: \.self) { w in
                 HStack(alignment: .top, spacing: 6) {
@@ -63,7 +64,7 @@ struct WarningsBox: View {
             }
         }
         .padding()
-        .background(Color.orange.opacity(0.12))
+        .background(OVMTheme.warningBackground)
         .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 }
@@ -78,7 +79,7 @@ struct DiveResultCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(title).font(.title2.bold())
+            Text(title).font(.title2.bold()).foregroundStyle(OVMTheme.accent)
 
             // Summary grid
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
@@ -103,7 +104,7 @@ struct DiveResultCard: View {
                 DecoTable(stops: result.schedule)
             } else {
                 Label("No decompression required", systemImage: "checkmark.circle")
-                    .foregroundStyle(.green)
+                    .foregroundStyle(OVMTheme.accent)
             }
 
             // Gas usage
@@ -139,12 +140,12 @@ struct SummaryCell: View {
     var highlight: Bool = false
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(label).font(.caption).foregroundStyle(.secondary)
-            Text(value).font(.headline).foregroundStyle(highlight ? .red : .primary)
+            Text(label).font(.caption).foregroundStyle(OVMTheme.textSecondary)
+            Text(value).font(.headline).foregroundStyle(highlight ? OVMTheme.danger : OVMTheme.textPrimary)
         }
         .padding(10)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(OVMTheme.card)
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }
@@ -161,7 +162,7 @@ struct DiveProfileTable: View {
                 Text("Runtime").font(.caption.bold()).frame(maxWidth: .infinity)
             }
             .padding(.vertical, 6)
-            .background(Color.blue.opacity(0.16))
+            .background(OVMTheme.tableHover)
 
             ForEach(Array(levels.enumerated()), id: \.element.id) { index, level in
                 HStack {
@@ -175,7 +176,7 @@ struct DiveProfileTable: View {
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: 8))
-        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.secondary.opacity(0.3)))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(OVMTheme.border))
     }
 
     private func runtimeThroughLevel(at index: Int) -> Double {
@@ -196,7 +197,7 @@ struct DecoTable: View {
                 Text("Gas").font(.caption.bold()).frame(maxWidth: .infinity)
             }
             .padding(.vertical, 6)
-            .background(Color.cyan.opacity(0.2))
+            .background(OVMTheme.tableHover)
 
             ForEach(stops, id: \.depth) { s in
                 HStack {
@@ -210,7 +211,7 @@ struct DecoTable: View {
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: 8))
-        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.secondary.opacity(0.3)))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(OVMTheme.border))
     }
 }
 
@@ -251,7 +252,7 @@ struct BailoutSection: View {
             }
         }
         .padding()
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(OVMTheme.card)
         .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 }

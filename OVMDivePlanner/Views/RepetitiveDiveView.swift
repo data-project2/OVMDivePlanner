@@ -17,7 +17,7 @@ struct RepetitiveDiveView: View {
             }
 
             // Dive 2 levels
-            Text("Dive 2 Profile (m / min)").font(.subheadline).foregroundStyle(.secondary)
+            Text("Dive 2 Profile (m / min)").font(.subheadline).foregroundStyle(OVMTheme.textSecondary)
             ForEach($vm.levels2) { $level in
                 LevelRow(level: $level)
             }
@@ -27,12 +27,12 @@ struct RepetitiveDiveView: View {
             }
 
             // Dive 2 bottom gas
-            Text(vm.circuitType == .ccr ? "Dive 2 Diluent Gas" : "Dive 2 Bottom Gas").font(.subheadline).foregroundStyle(.secondary)
+            Text(vm.circuitType == .ccr ? "Dive 2 Diluent Gas" : "Dive 2 Bottom Gas").font(.subheadline).foregroundStyle(OVMTheme.textSecondary)
             GasPickerRow(gas: $vm.bottomGas2, showSwitch: false)
 
             // Dive 2 deco gases (OC only)
             if vm.circuitType == .oc {
-                Text("Dive 2 Deco Gases").font(.subheadline).foregroundStyle(.secondary)
+                Text("Dive 2 Deco Gases").font(.subheadline).foregroundStyle(OVMTheme.textSecondary)
                 ForEach($vm.decoGases2) { $g in
                     GasPickerRow(gas: $g, showSwitch: true)
                 }

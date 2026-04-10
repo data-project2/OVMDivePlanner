@@ -56,9 +56,10 @@ struct SettingsView: View {
                         .pickerStyle(.segmented)
                         .frame(width: 120)
                     }
-                    Toggle("Transit time counts toward level time", isOn: $vm.transitInclusive)
+                    Toggle("Descent time included in bottom time", isOn: $vm.transitInclusive)
                 } header: { Text("Decompression") }
             }
+            .ovmFormBackground()
             .navigationTitle("Settings")
         }
     }

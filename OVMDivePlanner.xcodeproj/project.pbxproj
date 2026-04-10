@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		686BB34C2F8918FE0056FB17 /* appstore.png in Resources */ = {isa = PBXBuildFile; fileRef = 686BB34B2F8918FE0056FB17 /* appstore.png */; };
 		68948E0D2F868B09008AB2E2 /* project.yml in Resources */ = {isa = PBXBuildFile; fileRef = 68948E0B2F868B09008AB2E2 /* project.yml */; };
 		68948E0E2F868B09008AB2E2 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 68948E0C2F868B09008AB2E2 /* README.md */; };
 		68948E0F2F868B09008AB2E2 /* DivePlannerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68948E012F868B09008AB2E2 /* DivePlannerViewModel.swift */; };
@@ -23,6 +24,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		686BB34B2F8918FE0056FB17 /* appstore.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = appstore.png; sourceTree = "<group>"; };
 		686DBE102F8675AF000D23C2 /* OVMDivePlanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OVMDivePlanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		68948DFA2F868B09008AB2E2 /* BuhlmannEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuhlmannEngine.swift; sourceTree = "<group>"; };
 		68948DFB2F868B09008AB2E2 /* DivePlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DivePlanner.swift; sourceTree = "<group>"; };
@@ -56,6 +58,7 @@
 				68948E0A2F868B09008AB2E2 /* OVMDivePlanner */,
 				68948E0B2F868B09008AB2E2 /* project.yml */,
 				68948E0C2F868B09008AB2E2 /* README.md */,
+				686BB34B2F8918FE0056FB17 /* appstore.png */,
 				686DBE112F8675AF000D23C2 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -188,6 +191,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				68948E0D2F868B09008AB2E2 /* project.yml in Resources */,
+				686BB34C2F8918FE0056FB17 /* appstore.png in Resources */,
 				68948E0E2F868B09008AB2E2 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -342,11 +346,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = DKA242B3QX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "OVM Dive Planner";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -375,11 +381,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = DKA242B3QX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "OVM Dive Planner";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

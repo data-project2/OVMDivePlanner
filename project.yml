@@ -22,7 +22,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.ovmdiver.OVMDivePlanner
         INFOPLIST_FILE: OVMDivePlanner/Info.plist
-        DEVELOPMENT_TEAM: ""
+        DEVELOPMENT_TEAM: "OVM"
     info:
       path: OVMDivePlanner/Info.plist
       properties:
