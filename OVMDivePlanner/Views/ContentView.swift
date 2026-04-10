@@ -1,4 +1,3 @@
-
 // ContentView.swift
 // Root tab container
 
@@ -10,14 +9,17 @@ struct ContentView: View {
     var body: some View {
         TabView(selection: $vm.selectedTab) {
             PlannerView()
-                .tag(PlannerTab.plan)
                 .tabItem { Label("Plan", systemImage: "arrow.down.to.line") }
+                .tag(PlannerTab.plan)
             ResultsView()
-                .tag(PlannerTab.schedule)
                 .tabItem { Label("Schedule", systemImage: "list.bullet.clipboard") }
+                .tag(PlannerTab.schedule)
+            MixerView()
+                .tabItem { Label("Mixer", systemImage: "flask.fill") }
+                .tag(PlannerTab.mixer)
             SettingsView()
-                .tag(PlannerTab.settings)
                 .tabItem { Label("Settings", systemImage: "gearshape") }
+                .tag(PlannerTab.settings)
         }
         .environmentObject(vm)
         .tint(OVMTheme.accent)

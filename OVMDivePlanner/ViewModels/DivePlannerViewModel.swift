@@ -8,6 +8,7 @@ import SwiftUI
 enum PlannerTab: Hashable {
     case plan
     case schedule
+    case mixer
     case settings
 }
 

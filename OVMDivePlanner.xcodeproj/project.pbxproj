@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		686BB34C2F8918FE0056FB17 /* appstore.png in Resources */ = {isa = PBXBuildFile; fileRef = 686BB34B2F8918FE0056FB17 /* appstore.png */; };
 		686BB35D2F89514F0056FB17 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 686BB35C2F89514F0056FB17 /* Assets.xcassets */; };
+		686BB35F2F89545F0056FB17 /* MixerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 686BB35E2F89545F0056FB17 /* MixerEngine.swift */; };
+		686BB3632F89549A0056FB17 /* MixerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 686BB3622F89549A0056FB17 /* MixerViewModel.swift */; };
+		686BB3652F8954A50056FB17 /* MixerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 686BB3642F8954A50056FB17 /* MixerView.swift */; };
 		68948E0D2F868B09008AB2E2 /* project.yml in Resources */ = {isa = PBXBuildFile; fileRef = 68948E0B2F868B09008AB2E2 /* project.yml */; };
 		68948E0E2F868B09008AB2E2 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 68948E0C2F868B09008AB2E2 /* README.md */; };
 		68948E0F2F868B09008AB2E2 /* DivePlannerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68948E012F868B09008AB2E2 /* DivePlannerViewModel.swift */; };
@@ -38,6 +41,9 @@
 		686BB34B2F8918FE0056FB17 /* appstore.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = appstore.png; sourceTree = "<group>"; };
 		686BB3512F894B3F0056FB17 /* OVMDivePlannerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OVMDivePlannerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		686BB35C2F89514F0056FB17 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		686BB35E2F89545F0056FB17 /* MixerEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixerEngine.swift; sourceTree = "<group>"; };
+		686BB3622F89549A0056FB17 /* MixerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixerViewModel.swift; sourceTree = "<group>"; };
+		686BB3642F8954A50056FB17 /* MixerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MixerView.swift; sourceTree = "<group>"; };
 		686DBE102F8675AF000D23C2 /* OVMDivePlanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OVMDivePlanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		68948DFA2F868B09008AB2E2 /* BuhlmannEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuhlmannEngine.swift; sourceTree = "<group>"; };
 		68948DFB2F868B09008AB2E2 /* DivePlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DivePlanner.swift; sourceTree = "<group>"; };
@@ -104,6 +110,7 @@
 		68948DFC2F868B09008AB2E2 /* Engine */ = {
 			isa = PBXGroup;
 			children = (
+				686BB35E2F89545F0056FB17 /* MixerEngine.swift */,
 				68948DFA2F868B09008AB2E2 /* BuhlmannEngine.swift */,
 				68948DFB2F868B09008AB2E2 /* DivePlanner.swift */,
 			);
@@ -129,6 +136,7 @@
 		68948E022F868B09008AB2E2 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				686BB3622F89549A0056FB17 /* MixerViewModel.swift */,
 				68948E012F868B09008AB2E2 /* DivePlannerViewModel.swift */,
 			);
 			path = ViewModels;
@@ -137,6 +145,7 @@
 		68948E082F868B09008AB2E2 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				686BB3642F8954A50056FB17 /* MixerView.swift */,
 				68948E032F868B09008AB2E2 /* ContentView.swift */,
 				68948E042F868B09008AB2E2 /* PlannerView.swift */,
 				68948E052F868B09008AB2E2 /* RepetitiveDiveView.swift */,
@@ -281,13 +290,16 @@
 				68948E102F868B09008AB2E2 /* ResultsView.swift in Sources */,
 				68948E112F868B09008AB2E2 /* DivePlanner.swift in Sources */,
 				68948E122F868B09008AB2E2 /* BuhlmannEngine.swift in Sources */,
+				686BB3632F89549A0056FB17 /* MixerViewModel.swift in Sources */,
 				68948E132F868B09008AB2E2 /* PlannerView.swift in Sources */,
+				686BB3652F8954A50056FB17 /* MixerView.swift in Sources */,
 				68948E142F868B09008AB2E2 /* RepetitiveDiveView.swift in Sources */,
 				68948E152F868B09008AB2E2 /* ContentView.swift in Sources */,
 				68948E162F868B09008AB2E2 /* SettingsView.swift in Sources */,
 				68948E172F868B09008AB2E2 /* OVMDivePlannerApp.swift in Sources */,
 				68948E182F868B09008AB2E2 /* Models.swift in Sources */,
 				68948E192F868B09008AB2E2 /* SharedComponents.swift in Sources */,
+				686BB35F2F89545F0056FB17 /* MixerEngine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
