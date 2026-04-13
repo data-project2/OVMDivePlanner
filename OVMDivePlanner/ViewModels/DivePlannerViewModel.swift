@@ -68,19 +68,12 @@ class DivePlannerViewModel: ObservableObject {
         let input2: DivePlanInput? = enableRepetitive ? buildInput(isSecond: true) : nil
         let surfaceInterval = self.surfaceInterval
 
-        Task.detached(priority: .userInitiated) { [weak self] in
+        Task(priority: .userInitiated) { [weak self] in
             guard let self else { return }
-            let r1 = planDive(input: input)
-            var r2: DiveResultData? = nil
-            if let inp2 = input2 {
-                let t = applySurfaceInterval(tissues: r1.finalTissues, interval: surfaceInterval, surfP: input.surfacePressure)
-                r2 = planDive(input: inp2, initialTissues: t, initialCNS: r1.finalCNS, initialOTU: r1.finalOTU)
-            }
-            await MainActor.run { [r1, r2] in
-                self.results = r1
-                self.results2 = r2
-                self.isCalculating = false
-            }
+            let (r1, r2) = Self.runCalculation(input: input, input2: input2, surfaceInterval: surfaceInterval)
+            self.results = r1
+            self.results2 = r2
+            self.isCalculating = false
         }
     }
 
@@ -99,6 +92,32 @@ class DivePlannerViewModel: ObservableObject {
     func removeDecoGas2(at offsets: IndexSet) { decoGases2.remove(atOffsets: offsets) }
 
     // MARK: – Private helpers
+
+    @MainActor
+    private static func runCalculation(
+        input: DivePlanInput,
+        input2: DivePlanInput?,
+        surfaceInterval: Double
+    ) -> (DiveResultData, DiveResultData?) {
+        let r1 = planDive(input: input)
+        var r2: DiveResultData? = nil
+
+        if let inp2 = input2 {
+            let tissues = applySurfaceInterval(
+                tissues: r1.finalTissues,
+                interval: surfaceInterval,
+                surfP: input.surfacePressure
+            )
+            r2 = planDive(
+                input: inp2,
+                initialTissues: tissues,
+                initialCNS: r1.finalCNS,
+                initialOTU: r1.finalOTU
+            )
+        }
+
+        return (r1, r2)
+    }
 
     private func buildInput(isSecond: Bool = false) -> DivePlanInput {
         DivePlanInput(
