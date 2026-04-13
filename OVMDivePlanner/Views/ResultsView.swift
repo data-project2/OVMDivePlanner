@@ -34,7 +34,7 @@ struct ResultsView: View {
                             .foregroundStyle(OVMTheme.accent.opacity(0.6))
                         Text("No results yet")
                             .font(.title3).foregroundStyle(OVMTheme.textSecondary)
-                        Text("Configure your dive and tap Calculate Decompression in the Plan tab.")
+                        Text("Configure your dive and tap Plan Dive in the Plan tab.")
                             .font(.caption).foregroundStyle(OVMTheme.textTertiary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)

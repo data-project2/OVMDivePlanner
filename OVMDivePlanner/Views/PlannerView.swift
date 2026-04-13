@@ -81,7 +81,7 @@ struct PlannerView: View {
                             if vm.isCalculating {
                                 ProgressView().padding(.trailing, 8)
                             }
-                            Text(vm.isCalculating ? "Calculating…" : "Calculate Decompression")
+                            Text(vm.isCalculating ? "Calculating…" : "Plan Dive")
                                 .font(.headline)
                             Spacer()
                         }
