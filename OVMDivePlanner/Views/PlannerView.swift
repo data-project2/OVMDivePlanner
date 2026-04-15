@@ -105,15 +105,37 @@ struct LevelRow: View {
     @Binding var level: DiveLevel
     var body: some View {
         HStack {
-            Text("Depth (m)").foregroundStyle(OVMTheme.textSecondary).frame(width: 80, alignment: .leading)
-            TextField("0", value: $level.depth, format: .number)
-                .keyboardType(.decimalPad)
-                .multilineTextAlignment(.trailing)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Depth (m)")
+                    .foregroundStyle(OVMTheme.textSecondary)
+
+                Picker("Depth (m)", selection: $level.depth) {
+                    ForEach(0...150, id: \.self) { depth in
+                        Text("\(depth)").tag(Double(depth))
+                    }
+                }
+                .labelsHidden()
+                .pickerStyle(.wheel)
+                .frame(width: 96, height: 100)
+                .clipped()
+            }
+
             Spacer().frame(width: 24)
-            Text("Time (min)").foregroundStyle(OVMTheme.textSecondary).frame(width: 80, alignment: .leading)
-            TextField("0", value: $level.time, format: .number)
-                .keyboardType(.decimalPad)
-                .multilineTextAlignment(.trailing)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Time (min)")
+                    .foregroundStyle(OVMTheme.textSecondary)
+
+                Picker("Time (min)", selection: $level.time) {
+                    ForEach(0...300, id: \.self) { minute in
+                        Text("\(minute)").tag(Double(minute))
+                    }
+                }
+                .labelsHidden()
+                .pickerStyle(.wheel)
+                .frame(width: 96, height: 100)
+                .clipped()
+            }
         }
     }
 }
@@ -125,15 +147,11 @@ struct GasPickerRow: View {
     var showSwitch: Bool
 
     @State private var preset: GasPreset = .custom
-    @State private var o2Str = ""
-    @State private var heStr = ""
     @State private var swStr = ""
     @State private var isSyncingFromGas = false
     @FocusState private var focusedField: Field?
 
     private enum Field: Hashable {
-        case oxygen
-        case helium
         case switchDepth
     }
 
@@ -160,22 +178,45 @@ struct GasPickerRow: View {
             }
 
             HStack {
-                Group {
-                    Text("O₂%").frame(width: 36)
-                    TextField("21", text: $o2Str)
-                        .keyboardType(.decimalPad)
-                        .focused($focusedField, equals: .oxygen)
-                        .submitLabel(.done)
-                        .onChange(of: o2Str) { _ in updateGas() }
-                    Text("He%").frame(width: 36)
-                    TextField("0", text: $heStr)
-                        .keyboardType(.decimalPad)
-                        .focused($focusedField, equals: .helium)
-                        .submitLabel(.done)
-                        .onChange(of: heStr) { _ in updateGas() }
-                }
-                .textFieldStyle(.roundedBorder)
-                .frame(maxWidth: .infinity)
+                gasPercentWheel(
+                    title: "O₂%",
+                    selection: Binding(
+                        get: { Int((gas.fO2 * 100).rounded()) },
+                        set: { newValue in
+                            let o2 = min(100, max(0, newValue))
+                            let he = min(Int((gas.fHe * 100).rounded()), 100 - o2)
+                            gas = GasMix(
+                                id: gas.id,
+                                fO2: Double(o2) / 100,
+                                fHe: Double(he) / 100,
+                                switchDepth: gas.switchDepth
+                            )
+                            if preset != .custom {
+                                preset = .custom
+                            }
+                        }
+                    )
+                )
+
+                gasPercentWheel(
+                    title: "He%",
+                    selection: Binding(
+                        get: { Int((gas.fHe * 100).rounded()) },
+                        set: { newValue in
+                            let o2 = Int((gas.fO2 * 100).rounded())
+                            let he = min(max(0, newValue), 100 - o2)
+                            gas = GasMix(
+                                id: gas.id,
+                                fO2: Double(o2) / 100,
+                                fHe: Double(he) / 100,
+                                switchDepth: gas.switchDepth
+                            )
+                            if preset != .custom {
+                                preset = .custom
+                            }
+                        }
+                    )
+                )
             }
 
             if showSwitch {
@@ -207,18 +248,14 @@ struct GasPickerRow: View {
     private func syncFromGas() {
         guard focusedField == nil else { return }
 
-        let nextO2 = String(format: "%.0f", gas.fO2 * 100)
-        let nextHe = String(format: "%.0f", gas.fHe * 100)
         let nextSwitchDepth = gas.switchDepth.map { String(format: "%.0f", $0) } ?? ""
         let nextPreset = preset(for: gas)
 
-        guard o2Str != nextO2 || heStr != nextHe || swStr != nextSwitchDepth || preset != nextPreset else {
+        guard swStr != nextSwitchDepth || preset != nextPreset else {
             return
         }
 
         isSyncingFromGas = true
-        o2Str = nextO2
-        heStr = nextHe
         swStr = nextSwitchDepth
         preset = nextPreset
         isSyncingFromGas = false
@@ -227,10 +264,8 @@ struct GasPickerRow: View {
     private func updateGas() {
         guard !isSyncingFromGas else { return }
 
-        let o2 = (Double(o2Str) ?? gas.fO2 * 100) / 100
-        let he = (Double(heStr) ?? gas.fHe * 100) / 100
         let sw = Double(swStr)
-        let nextGas = GasMix(id: gas.id, fO2: min(1, max(0, o2)), fHe: min(1 - o2, max(0, he)), switchDepth: sw)
+        let nextGas = GasMix(id: gas.id, fO2: gas.fO2, fHe: gas.fHe, switchDepth: sw)
 
         if gas != nextGas {
             gas = nextGas
@@ -264,6 +299,25 @@ struct GasPickerRow: View {
         case (0.21, 0.35): return .tx2135
         case (0.18, 0.45): return .tx1845
         default: return .custom
+        }
+    }
+
+    @ViewBuilder
+    private func gasPercentWheel(title: String, selection: Binding<Int>) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Picker(title, selection: selection) {
+                ForEach(0...100, id: \.self) { value in
+                    Text("\(value)").tag(value)
+                }
+            }
+            .labelsHidden()
+            .pickerStyle(.wheel)
+            .frame(width: 96)
+            .frame(height: 110)
+            .clipped()
         }
     }
 }
