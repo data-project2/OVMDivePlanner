@@ -47,7 +47,7 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    LabeledSlider(label: "Descent rate (\(vm.unitSystem.rateUnit))", value: rateBinding($vm.descentRate), range: rateRange(5...30), step: vm.unitSystem == .metric ? 1 : 5,
+                    LabeledSlider(label: "Descent rate (\(vm.unitSystem.rateUnit))", value: rateBinding($vm.descentRate), range: rateRange(5...100), step: vm.unitSystem == .metric ? 1 : 5,
                                   format: vm.unitSystem == .metric ? "%.0f m/min" : "%.0f ft/min")
                     LabeledSlider(label: "Ascent rate (\(vm.unitSystem.rateUnit))", value: rateBinding($vm.ascentRate), range: rateRange(3...18), step: vm.unitSystem == .metric ? 1 : 5,
                                   format: vm.unitSystem == .metric ? "%.0f m/min" : "%.0f ft/min")
