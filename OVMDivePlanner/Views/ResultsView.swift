@@ -18,11 +18,11 @@ struct ResultsView: View {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 20) {
                             if !r.warnings.isEmpty { WarningsBox(warnings: r.warnings) }
-                            DiveResultCard(title: "Dive 1", levels: vm.levels, result: r)
+                            DiveResultCard(title: "Dive 1", levels: vm.levels, result: r, unitSystem: vm.unitSystem)
                             if let r2 = vm.results2 {
                                 Divider()
                                 if !r2.warnings.isEmpty { WarningsBox(warnings: r2.warnings) }
-                                DiveResultCard(title: "Dive 2", levels: vm.levels2, result: r2)
+                                DiveResultCard(title: "Dive 2", levels: vm.levels2, result: r2, unitSystem: vm.unitSystem)
                             }
                         }
                         .padding()
@@ -76,6 +76,7 @@ struct DiveResultCard: View {
     let levels: [DiveLevel]
 
     let result: DiveResultData
+    let unitSystem: UnitSystem
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -83,25 +84,25 @@ struct DiveResultCard: View {
 
             // Summary grid
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                SummaryCell(label: "Max Depth", value: "\(Int(result.maxDepth)) m")
+                SummaryCell(label: "Max Depth", value: depthString(result.maxDepth))
                 SummaryCell(label: "Bottom Runtime", value: "\(fmtMin(result.bottomRuntime))")
                 SummaryCell(label: "Total Runtime", value: "\(fmtMin(result.totalRuntime))")
                 SummaryCell(label: "Total Stop Time", value: "\(fmtMin(result.totalStopTime))")
-                SummaryCell(label: "First Stop", value: result.schedule.isEmpty ? "No deco" : "\(Int(result.firstStopDepth)) m")
-                SummaryCell(label: "Avg Depth", value: "\(result.averageDepth) m")
+                SummaryCell(label: "First Stop", value: result.schedule.isEmpty ? "No deco" : depthString(result.firstStopDepth))
+                SummaryCell(label: "Avg Depth", value: depthString(result.averageDepth))
                 SummaryCell(label: "CNS%", value: String(format: "%.1f%%", result.cnsPct), highlight: result.cnsPct >= 80)
                 SummaryCell(label: "OTU", value: String(format: "%.0f", result.otuTotal), highlight: result.otuTotal >= 280)
             }
 
             if !levels.isEmpty {
                 Text("Dive Profile").font(.headline)
-                DiveProfileTable(levels: levels)
+                DiveProfileTable(levels: levels, unitSystem: unitSystem)
             }
 
             // Deco schedule
             if !result.schedule.isEmpty {
                 Text("Decompression Schedule").font(.headline)
-                DecoTable(stops: result.schedule)
+                DecoTable(stops: result.schedule, unitSystem: unitSystem)
             } else {
                 Label("No decompression required", systemImage: "checkmark.circle")
                     .foregroundStyle(OVMTheme.accent)
@@ -109,12 +110,12 @@ struct DiveResultCard: View {
 
             // Gas usage
             if !result.gasUsage.isEmpty {
-                Text("Gas Usage (litres)").font(.headline)
+                Text("Gas Usage (\(unitSystem.volumeUnit))").font(.headline)
                 ForEach(result.gasUsage, id: \.label) { g in
                     HStack {
                         Text(g.label)
                         Spacer()
-                        Text(String(format: "%.0f L", g.litres)).bold()
+                        Text(volumeString(g.litres)).bold()
                     }
                     .padding(.vertical, 2)
                 }
@@ -122,7 +123,7 @@ struct DiveResultCard: View {
 
             // Bailout (CCR only)
             if let bo = result.bailout {
-                BailoutSection(bo: bo)
+                BailoutSection(bo: bo, unitSystem: unitSystem)
             }
         }
     }
@@ -131,6 +132,16 @@ struct DiveResultCard: View {
         let total = Int(m)
         let h = total / 60; let mn = total % 60
         return h > 0 ? "\(h)h \(mn)min" : "\(mn) min"
+    }
+
+    func depthString(_ meters: Double) -> String {
+        let displayDepth = unitSystem.depth(meters)
+        return unitSystem == .metric ? "\(Int(displayDepth.rounded())) m" : "\(Int(displayDepth.rounded())) ft"
+    }
+
+    func volumeString(_ liters: Double) -> String {
+        let displayVolume = unitSystem.volume(liters)
+        return unitSystem == .metric ? String(format: "%.0f L", displayVolume) : String(format: "%.1f cuft", displayVolume)
     }
 }
 
@@ -152,6 +163,7 @@ struct SummaryCell: View {
 
 struct DiveProfileTable: View {
     let levels: [DiveLevel]
+    let unitSystem: UnitSystem
 
     var body: some View {
         VStack(spacing: 0) {
@@ -167,7 +179,7 @@ struct DiveProfileTable: View {
             ForEach(Array(levels.enumerated()), id: \.element.id) { index, level in
                 HStack {
                     Text("\(index + 1)").frame(maxWidth: .infinity)
-                    Text("\(Int(level.depth)) m").frame(maxWidth: .infinity)
+                    Text(unitSystem == .metric ? "\(Int(level.depth.rounded())) m" : "\(Int(unitSystem.depth(level.depth).rounded())) ft").frame(maxWidth: .infinity)
                     Text("\(Int(level.time)) min").frame(maxWidth: .infinity)
                     Text("\(Int(runtimeThroughLevel(at: index))) min").frame(maxWidth: .infinity)
                 }
@@ -188,6 +200,7 @@ struct DiveProfileTable: View {
 
 struct DecoTable: View {
     let stops: [DecoStop]
+    let unitSystem: UnitSystem
     var body: some View {
         VStack(spacing: 0) {
             HStack {
@@ -201,7 +214,7 @@ struct DecoTable: View {
 
             ForEach(stops, id: \.depth) { s in
                 HStack {
-                    Text("\(Int(s.depth)) m").frame(maxWidth: .infinity)
+                    Text(unitSystem == .metric ? "\(Int(s.depth.rounded())) m" : "\(Int(unitSystem.depth(s.depth).rounded())) ft").frame(maxWidth: .infinity)
                     Text("\(Int(s.stopTime)) min").frame(maxWidth: .infinity)
                     Text("\(Int(s.runtime)) min").frame(maxWidth: .infinity)
                     Text(s.gas).frame(maxWidth: .infinity).lineLimit(1).minimumScaleFactor(0.7)
@@ -219,6 +232,7 @@ struct DecoTable: View {
 
 struct BailoutSection: View {
     let bo: BailoutResultData
+    let unitSystem: UnitSystem
     @State private var expanded = false
 
     var body: some View {
@@ -239,14 +253,14 @@ struct BailoutSection: View {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                     SummaryCell(label: "Runtime", value: "\(Int(bo.totalRuntime)) min")
                     SummaryCell(label: "Stop Time", value: "\(Int(bo.totalStopTime)) min")
-                    SummaryCell(label: "Avg Depth", value: "\(bo.averageDepth) m")
+                    SummaryCell(label: "Avg Depth", value: unitSystem == .metric ? "\(Int(bo.averageDepth.rounded())) m" : "\(Int(unitSystem.depth(bo.averageDepth).rounded())) ft")
                     SummaryCell(label: "CNS%", value: String(format: "%.1f%%", bo.cnsPct), highlight: bo.cnsPct >= 80)
                 }
 
-                if !bo.schedule.isEmpty { DecoTable(stops: bo.schedule) }
+                if !bo.schedule.isEmpty { DecoTable(stops: bo.schedule, unitSystem: unitSystem) }
                 if !bo.gasUsage.isEmpty {
                     ForEach(bo.gasUsage, id: \.label) { g in
-                        HStack { Text(g.label); Spacer(); Text(String(format: "%.0f L", g.litres)).bold() }
+                        HStack { Text(g.label); Spacer(); Text(unitSystem == .metric ? String(format: "%.0f L", g.litres) : String(format: "%.1f cuft", unitSystem.volume(g.litres))).bold() }
                     }
                 }
             }
