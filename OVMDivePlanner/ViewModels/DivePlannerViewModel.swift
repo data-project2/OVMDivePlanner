@@ -14,15 +14,20 @@ enum PlannerTab: Hashable {
 
 @MainActor
 class DivePlannerViewModel: ObservableObject {
+    private static let settingsDefaultsKey = "ovm.settings"
+    private var isRestoringSettings = false
 
     // MARK: – Published inputs
 
     @Published var circuitType: CircuitType = .oc
-    @Published var waterType: WaterType = .salt
+    @Published var waterType: WaterType = .salt {
+        didSet { persistSettings() }
+    }
     @Published var unitSystem: UnitSystem = .metric {
         didSet {
             guard oldValue != unitSystem else { return }
             normalizeValuesForUnitSystem()
+            persistSettings()
         }
     }
     @Published var levels: [DiveLevel] = [DiveLevel(depth: 30, time: 20)]
@@ -31,21 +36,47 @@ class DivePlannerViewModel: ObservableObject {
 
     // CCR
     @Published var diluent: GasMix = GasMix.air
-    @Published var setpointLow: Double = 0.7
-    @Published var setpointHigh: Double = 1.3
-    @Published var setpointDeco: Double = 1.6
-    @Published var setpointSwitchDepth: Double = 6
+    @Published var setpointLow: Double = 0.7 {
+        didSet { persistSettings() }
+    }
+    @Published var setpointHigh: Double = 1.3 {
+        didSet { persistSettings() }
+    }
+    @Published var setpointDeco: Double = 1.6 {
+        didSet { persistSettings() }
+    }
+    @Published var setpointSwitchDepth: Double = 6 {
+        didSet { persistSettings() }
+    }
 
     // Settings
-    @Published var gfLow: Double = 35
-    @Published var gfHigh: Double = 70
-    @Published var descentRate: Double = 20
-    @Published var ascentRate: Double = 9
-    @Published var sacBottom: Double = 20
-    @Published var sacDeco: Double = 15
-    @Published var lastStopDepth: Double = 3
-    @Published var surfacePressure: Double = 1.0
-    @Published var transitInclusive: Bool = true
+    @Published var gfLow: Double = 35 {
+        didSet { persistSettings() }
+    }
+    @Published var gfHigh: Double = 70 {
+        didSet { persistSettings() }
+    }
+    @Published var descentRate: Double = 20 {
+        didSet { persistSettings() }
+    }
+    @Published var ascentRate: Double = 9 {
+        didSet { persistSettings() }
+    }
+    @Published var sacBottom: Double = 20 {
+        didSet { persistSettings() }
+    }
+    @Published var sacDeco: Double = 15 {
+        didSet { persistSettings() }
+    }
+    @Published var lastStopDepth: Double = 3 {
+        didSet { persistSettings() }
+    }
+    @Published var surfacePressure: Double = 1.0 {
+        didSet { persistSettings() }
+    }
+    @Published var transitInclusive: Bool = true {
+        didSet { persistSettings() }
+    }
 
     // Repetitive dive
     @Published var enableRepetitive: Bool = false
@@ -61,6 +92,10 @@ class DivePlannerViewModel: ObservableObject {
     @Published var isCalculating: Bool = false
     @Published var errorMessage: String? = nil
     @Published var selectedTab: PlannerTab = .plan
+
+    init() {
+        restoreSettings()
+    }
 
     // MARK: – Calculate
 
@@ -176,4 +211,76 @@ class DivePlannerViewModel: ObservableObject {
             switchDepth: unitSystem.normalizeMetricSwitchDepth(switchDepth)
         )
     }
+
+    private func persistSettings() {
+        guard !isRestoringSettings else { return }
+
+        let snapshot = PlannerSettingsSnapshot(
+            waterType: waterType,
+            unitSystem: unitSystem,
+            setpointLow: setpointLow,
+            setpointHigh: setpointHigh,
+            setpointDeco: setpointDeco,
+            setpointSwitchDepth: setpointSwitchDepth,
+            gfLow: gfLow,
+            gfHigh: gfHigh,
+            descentRate: descentRate,
+            ascentRate: ascentRate,
+            sacBottom: sacBottom,
+            sacDeco: sacDeco,
+            lastStopDepth: lastStopDepth,
+            surfacePressure: surfacePressure,
+            transitInclusive: transitInclusive
+        )
+
+        guard let data = try? JSONEncoder().encode(snapshot) else { return }
+        UserDefaults.standard.set(data, forKey: Self.settingsDefaultsKey)
+    }
+
+    private func restoreSettings() {
+        guard
+            let data = UserDefaults.standard.data(forKey: Self.settingsDefaultsKey),
+            let snapshot = try? JSONDecoder().decode(PlannerSettingsSnapshot.self, from: data)
+        else {
+            return
+        }
+
+        isRestoringSettings = true
+        waterType = snapshot.waterType
+        unitSystem = snapshot.unitSystem
+        setpointLow = snapshot.setpointLow
+        setpointHigh = snapshot.setpointHigh
+        setpointDeco = snapshot.setpointDeco
+        setpointSwitchDepth = snapshot.setpointSwitchDepth
+        gfLow = snapshot.gfLow
+        gfHigh = snapshot.gfHigh
+        descentRate = snapshot.descentRate
+        ascentRate = snapshot.ascentRate
+        sacBottom = snapshot.sacBottom
+        sacDeco = snapshot.sacDeco
+        lastStopDepth = snapshot.lastStopDepth
+        surfacePressure = snapshot.surfacePressure
+        transitInclusive = snapshot.transitInclusive
+        isRestoringSettings = false
+
+        normalizeValuesForUnitSystem()
+    }
+}
+
+private struct PlannerSettingsSnapshot: Codable {
+    let waterType: WaterType
+    let unitSystem: UnitSystem
+    let setpointLow: Double
+    let setpointHigh: Double
+    let setpointDeco: Double
+    let setpointSwitchDepth: Double
+    let gfLow: Double
+    let gfHigh: Double
+    let descentRate: Double
+    let ascentRate: Double
+    let sacBottom: Double
+    let sacDeco: Double
+    let lastStopDepth: Double
+    let surfacePressure: Double
+    let transitInclusive: Bool
 }
