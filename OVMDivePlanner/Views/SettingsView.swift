@@ -5,6 +5,11 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject private var vm: DivePlannerViewModel
+    @FocusState private var focusedField: Field?
+
+    private enum Field: Hashable {
+        case surfacePressure
+    }
 
     var body: some View {
         NavigationStack {
@@ -17,6 +22,7 @@ struct SettingsView: View {
                     LabeledContent("Surface pressure (bar)") {
                         TextField("1.0", value: $vm.surfacePressure, format: .number)
                             .keyboardType(.decimalPad)
+                            .focused($focusedField, equals: .surfacePressure)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 70)
                     }
@@ -60,7 +66,16 @@ struct SettingsView: View {
                 } header: { Text("Decompression") }
             }
             .ovmFormBackground()
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Settings")
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") {
+                        focusedField = nil
+                    }
+                }
+            }
         }
     }
 }

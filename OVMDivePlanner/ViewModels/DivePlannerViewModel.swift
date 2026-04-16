@@ -37,9 +37,9 @@ class DivePlannerViewModel: ObservableObject {
     @Published var ascentRate: Double = 9
     @Published var sacBottom: Double = 20
     @Published var sacDeco: Double = 15
-    @Published var lastStopDepth: Double = 6
+    @Published var lastStopDepth: Double = 3
     @Published var surfacePressure: Double = 1.0
-    @Published var transitInclusive: Bool = false
+    @Published var transitInclusive: Bool = true
 
     // Repetitive dive
     @Published var enableRepetitive: Bool = false
