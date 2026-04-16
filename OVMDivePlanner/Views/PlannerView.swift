@@ -26,28 +26,28 @@ struct PlannerView: View {
                 // Dive levels
                 Section {
                     ForEach($vm.levels) { $level in
-                        LevelRow(level: $level)
+                        LevelRow(level: $level, unitSystem: vm.unitSystem)
                     }
                     .onDelete(perform: vm.removeLevel)
                     Button(action: vm.addLevel) {
                         Label("Add Level", systemImage: "plus.circle")
                     }
                 } header: {
-                    Text("Dive Profile (m / min)")
+                    Text("Dive Profile (\(vm.unitSystem.depthUnit) / min)")
                 } footer: {
                     Text("Levels are processed top-to-bottom. Transit between levels uses descent/ascent rates from Settings.")
                 }
 
                 // Bottom gas
                 Section(vm.circuitType == .ccr ? "Diluent Gas" : "Bottom Gas") {
-                    GasPickerRow(gas: $vm.bottomGas, showSwitch: false)
+                    GasPickerRow(gas: $vm.bottomGas, showSwitch: false, unitSystem: vm.unitSystem)
                 }
 
                 // Deco gases (OC only)
                 if vm.circuitType == .oc {
                     Section {
                         ForEach($vm.decoGases) { $g in
-                            GasPickerRow(gas: $g, showSwitch: true)
+                            GasPickerRow(gas: $g, showSwitch: true, unitSystem: vm.unitSystem)
                         }
                         .onDelete(perform: vm.removeDecoGas)
                         Button(action: vm.addDecoGas) {
@@ -103,14 +103,31 @@ struct PlannerView: View {
 
 struct LevelRow: View {
     @Binding var level: DiveLevel
+    let unitSystem: UnitSystem
+
+    private var depthChoices: [Int] {
+        unitSystem == .metric ? Array(0...150) : Array(stride(from: 0, through: 500, by: 10))
+    }
+
+    private var displayedDepth: Binding<Double> {
+        Binding(
+            get: {
+                let displayDepth = unitSystem.depth(level.depth)
+                let nearest = depthChoices.min { abs(Double($0) - displayDepth) < abs(Double($1) - displayDepth) } ?? 0
+                return Double(nearest)
+            },
+            set: { level.depth = unitSystem.normalizeMetricProfileDepth(unitSystem.metricDepth($0)) }
+        )
+    }
+
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Depth (m)")
+                Text("Depth (\(unitSystem.depthUnit))")
                     .foregroundStyle(OVMTheme.textSecondary)
 
-                Picker("Depth (m)", selection: $level.depth) {
-                    ForEach(0...150, id: \.self) { depth in
+                Picker("Depth (\(unitSystem.depthUnit))", selection: displayedDepth) {
+                    ForEach(depthChoices, id: \.self) { depth in
                         Text("\(depth)").tag(Double(depth))
                     }
                 }
@@ -145,6 +162,7 @@ struct LevelRow: View {
 struct GasPickerRow: View {
     @Binding var gas: GasMix
     var showSwitch: Bool
+    let unitSystem: UnitSystem
 
     @State private var preset: GasPreset = .custom
     @State private var swStr = ""
@@ -221,7 +239,7 @@ struct GasPickerRow: View {
 
             if showSwitch {
                 HStack {
-                    Text("Switch depth (m, blank = auto)").foregroundStyle(OVMTheme.textSecondary).font(.caption)
+                    Text("Switch depth (\(unitSystem.depthUnit), blank = auto)").foregroundStyle(OVMTheme.textSecondary).font(.caption)
                     Spacer()
                     TextField("auto", text: $swStr)
                         .keyboardType(.decimalPad)
@@ -248,7 +266,7 @@ struct GasPickerRow: View {
     private func syncFromGas() {
         guard focusedField == nil else { return }
 
-        let nextSwitchDepth = gas.switchDepth.map { String(format: "%.0f", $0) } ?? ""
+        let nextSwitchDepth = gas.switchDepth.map { String(format: "%.0f", unitSystem.depth($0)) } ?? ""
         let nextPreset = preset(for: gas)
 
         guard swStr != nextSwitchDepth || preset != nextPreset else {
@@ -264,7 +282,7 @@ struct GasPickerRow: View {
     private func updateGas() {
         guard !isSyncingFromGas else { return }
 
-        let sw = Double(swStr)
+        let sw = Double(swStr).map { unitSystem.normalizeMetricSwitchDepth(unitSystem.metricDepth($0)) }
         let nextGas = GasMix(id: gas.id, fO2: gas.fO2, fHe: gas.fHe, switchDepth: sw)
 
         if gas != nextGas {
@@ -338,15 +356,22 @@ struct CCRSettingsSheet: View {
                                   format: "%.2f bar")
                     LabeledSlider(label: "Deco setpoint", value: $vm.setpointDeco, range: 0.4...1.6, step: 0.05,
                                   format: "%.2f bar")
-                    LabeledContent("Switch to high below (m)") {
-                        TextField("6", value: $vm.setpointSwitchDepth, format: .number)
+                    LabeledContent("Switch to high below (\(vm.unitSystem.depthUnit))") {
+                        TextField(
+                            "6",
+                            value: Binding(
+                                get: { vm.unitSystem.depth(vm.setpointSwitchDepth) },
+                                set: { vm.setpointSwitchDepth = vm.unitSystem.normalizeMetricSwitchDepth(vm.unitSystem.metricDepth($0)) }
+                            ),
+                            format: .number
+                        )
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 60)
                     }
                 }
                 Section("Deco Gases (bailout)") {
-                    ForEach($vm.decoGases) { $g in GasPickerRow(gas: $g, showSwitch: true) }
+                    ForEach($vm.decoGases) { $g in GasPickerRow(gas: $g, showSwitch: true, unitSystem: vm.unitSystem) }
                         .onDelete(perform: vm.removeDecoGas)
                     Button(action: vm.addDecoGas) { Label("Add Gas", systemImage: "plus.circle") }
                 }

@@ -19,6 +19,12 @@ class DivePlannerViewModel: ObservableObject {
 
     @Published var circuitType: CircuitType = .oc
     @Published var waterType: WaterType = .salt
+    @Published var unitSystem: UnitSystem = .metric {
+        didSet {
+            guard oldValue != unitSystem else { return }
+            normalizeValuesForUnitSystem()
+        }
+    }
     @Published var levels: [DiveLevel] = [DiveLevel(depth: 30, time: 20)]
     @Published var bottomGas: GasMix = GasMix.air
     @Published var decoGases: [GasMix] = []
@@ -140,6 +146,34 @@ class DivePlannerViewModel: ObservableObject {
             setpointSwitchDepth: setpointSwitchDepth,
             setpointDeco: setpointDeco,
             diluent: isSecond ? bottomGas2 : bottomGas
+        )
+    }
+
+    private func normalizeValuesForUnitSystem() {
+        levels = levels.map(normalize)
+        levels2 = levels2.map(normalize)
+        decoGases = decoGases.map(normalize)
+        decoGases2 = decoGases2.map(normalize)
+        setpointSwitchDepth = unitSystem.normalizeMetricSwitchDepth(setpointSwitchDepth)
+        descentRate = unitSystem.normalizeMetricRate(descentRate)
+        ascentRate = unitSystem.normalizeMetricRate(ascentRate)
+        sacBottom = unitSystem.normalizeMetricVolume(sacBottom)
+        sacDeco = unitSystem.normalizeMetricVolume(sacDeco)
+    }
+
+    private func normalize(_ level: DiveLevel) -> DiveLevel {
+        var normalizedLevel = level
+        normalizedLevel.depth = unitSystem.normalizeMetricProfileDepth(level.depth)
+        return normalizedLevel
+    }
+
+    private func normalize(_ gas: GasMix) -> GasMix {
+        guard let switchDepth = gas.switchDepth else { return gas }
+        return GasMix(
+            id: gas.id,
+            fO2: gas.fO2,
+            fHe: gas.fHe,
+            switchDepth: unitSystem.normalizeMetricSwitchDepth(switchDepth)
         )
     }
 }
