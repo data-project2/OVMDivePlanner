@@ -64,4 +64,22 @@ final class DivePlannerTests: XCTestCase {
         XCTAssertFalse(result.bailout?.warnings.contains { $0.contains("exceeded 999") } ?? true)
         XCTAssertLessThan(result.bailout?.totalRuntime ?? 1_000, 1_000)
     }
+
+    func testImperialProfileDepthNormalizationPreservesDisplayedStep() {
+        let metricDepth = UnitSystem.imperial.normalizeMetricProfileDepth(UnitSystem.imperial.metricDepth(100))
+        XCTAssertEqual(UnitSystem.imperial.depth(metricDepth), 100, accuracy: 0.0001)
+    }
+
+    func testImperialSwitchDepthNormalizationPreservesDisplayedValue() {
+        let metricDepth = UnitSystem.imperial.normalizeMetricSwitchDepth(UnitSystem.imperial.metricDepth(101))
+        XCTAssertEqual(UnitSystem.imperial.depth(metricDepth), 101, accuracy: 0.0001)
+    }
+
+    func testImperialRateAndVolumeNormalizationPreserveDisplayedSteps() {
+        let metricRate = UnitSystem.imperial.normalizeMetricRate(UnitSystem.imperial.metricRate(35))
+        let metricVolume = UnitSystem.imperial.normalizeMetricVolume(UnitSystem.imperial.metricVolume(0.5))
+
+        XCTAssertEqual(UnitSystem.imperial.rate(metricRate), 35, accuracy: 0.0001)
+        XCTAssertEqual(UnitSystem.imperial.volume(metricVolume), 0.5, accuracy: 0.0001)
+    }
 }
