@@ -71,7 +71,7 @@ class DivePlannerViewModel: ObservableObject {
     @Published var lastStopDepth: Double = 3 {
         didSet { persistSettings() }
     }
-    @Published var surfacePressure: Double = 1.0 {
+    @Published var surfacePressure: Double = 1.013 {
         didSet { persistSettings() }
     }
     @Published var transitInclusive: Bool = true {
