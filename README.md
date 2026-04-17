@@ -1,107 +1,136 @@
-# OVM Dive Planner — iOS
+# OVM Dive Planner
 
-Full-featured native iOS dive decompression planner. SwiftUI, Bühlmann ZHL-16C with gradient factors.
-Mirrors all features of the OVM Deco Planner web app.
+Native iOS dive planning app built with SwiftUI.
 
-## Features
+The app calculates decompression schedules using a Bühlmann ZH-L16C model with gradient factors and supports both open-circuit and CCR workflows. It also includes a gas mixer and a visual dive profile editor.
 
-- Open Circuit (OC) and Closed Circuit Rebreather (CCR) modes
-- Multi-level dive profiles
-- Trimix support (N₂ + He)
-- Bühlmann ZHL-16C algorithm with configurable Gradient Factor (GF) Low/High
-- Automatic deco stops with gas switching at MOD
-- CNS% and OTU tracking
-- Gas usage calculation (SAC-based)
-- CCR setpoints (low, high, deco) with auto bailout deco schedule
-- Repetitive dives (surface interval + tissue carryover)
-- Salt / fresh water selection
-- Adjustable descent/ascent rates, SAC, last stop depth
+## Core Functionality
 
----
+- Open Circuit and CCR planning
+- Bühlmann ZH-L16C decompression model
+- Configurable GF low / high
+- Multi-level dive planning
+- List-based and visual profile planning modes
+- Trimix and helium support
+- Deco gas management with switch depths
+- CNS and OTU tracking
+- Gas usage estimation
+- Repetitive dive planning with tissue carry-over
+- Metric and imperial unit support
+- Persistent planner settings
+- Gas mixer tools for boost, top-off blend, and trimix fill calculations
 
-## Building on macOS / Xcode
+## Planner Modes
 
-### Option A — XcodeGen (Recommended)
+### Visual Planner
 
-1. Install [XcodeGen](https://github.com/yonaskolb/XcodeGen):
-   ```bash
-   brew install xcodegen
-   ```
-2. In Terminal, navigate to the `iOS/` folder:
-   ```bash
-   cd /path/to/deco-planner/iOS
-   xcodegen generate
-   ```
-3. Open the generated `OVMDivePlanner.xcodeproj` in Xcode.
-4. Select your development team in *Signing & Capabilities*.
-5. Choose a simulator or device and press **Run (⌘R)**.
+The visual planner is the default planner screen.
 
-### Option B — Manual Xcode Project
+- Y axis represents depth
+- X axis represents runtime
+- Add waypoints directly on the chart
+- Drag waypoints vertically to change depth
+- Drag waypoints horizontally to change hold time
+- Later waypoints shift in runtime automatically
+- Chart range expands dynamically based on the current profile
 
-1. Open Xcode → **File → New → Project → App**
-2. Product name: `OVMDivePlanner`, Interface: SwiftUI, Language: Swift
-3. Delete the placeholder `ContentView.swift` created by Xcode
-4. Drag all `.swift` files from `iOS/OVMDivePlanner/` into the project, maintaining the group structure:
-   ```
-   Engine/
-     BuhlmannEngine.swift
-     DivePlanner.swift
-   Models/
-     Models.swift
-   ViewModels/
-     DivePlannerViewModel.swift
-   Views/
-     ContentView.swift
-     PlannerView.swift
-     ResultsView.swift
-     SettingsView.swift
-     RepetitiveDiveView.swift
-   Utils/
-     SharedComponents.swift
-   OVMDivePlannerApp.swift
-   ```
-5. Make sure all files are in the `OVMDivePlanner` target.
-6. Set minimum deployment target to **iOS 16.0**.
-7. Build and run.
+### List Planner
 
----
+The list planner remains available as an alternative editor.
 
-## File Structure
+- Depth and time are entered as discrete levels
+- The same underlying dive profile is used by both list and visual modes
 
-```
-iOS/
-├── project.yml                    ← XcodeGen spec
-├── README.md
-└── OVMDivePlanner/
-    ├── OVMDivePlannerApp.swift    ← @main app entry
-    ├── Engine/
-    │   ├── BuhlmannEngine.swift   ← Bühlmann ZHL-16C tissue model
-    │   └── DivePlanner.swift      ← planDive(), computeBailout(), helpers
-    ├── Models/
-    │   └── Models.swift           ← GasMix, DiveLevel, DivePlanInput, results
-    ├── ViewModels/
-    │   └── DivePlannerViewModel.swift
-    ├── Views/
-    │   ├── ContentView.swift      ← TabView root
-    │   ├── PlannerView.swift      ← Dive input form
-    │   ├── ResultsView.swift      ← Deco schedule + summary
-    │   ├── SettingsView.swift     ← GF, rates, SAC
-    │   └── RepetitiveDiveView.swift
-    └── Utils/
-        └── SharedComponents.swift ← LabeledSlider + reusable UI
+## Project Structure
+
+```text
+OVMDivePlanner/
+├── OVMDivePlanner/
+│   ├── Assets.xcassets
+│   ├── Engine/
+│   │   ├── BuhlmannEngine.swift
+│   │   ├── DivePlanner.swift
+│   │   └── MixerEngine.swift
+│   ├── Models/
+│   │   └── Models.swift
+│   ├── Utils/
+│   │   └── SharedComponents.swift
+│   ├── ViewModels/
+│   │   ├── DivePlannerViewModel.swift
+│   │   └── MixerViewModel.swift
+│   ├── Views/
+│   │   ├── ContentView.swift
+│   │   ├── PlannerView.swift
+│   │   ├── RepetitiveDiveView.swift
+│   │   ├── ResultsView.swift
+│   │   ├── SettingsView.swift
+│   │   └── MixerView.swift
+│   └── OVMDivePlannerApp.swift
+├── OVMDivePlannerTests/
+├── project.yml
+├── appstore.png
+└── README.md
 ```
 
----
+## Build Requirements
 
-## Algorithm Notes
+- macOS with Xcode
+- iOS deployment target: 16.0
+- Personal or paid Apple Developer team for device signing
 
-The decompression engine is a Swift port of `buhlmann.js` / `planner.js` from the web app:
+## Build and Run
 
-- **16 tissue compartments** (ZHL-16C N₂ and He parameters)
-- **Schreiner equation** for linear depth-change segments
-- **Haldane equation** for constant-depth segments
-- **GF interpolation**: GF Low at first stop, linearly interpolating to GF High at surface
-- **CNS** calculated from NOAA ppO₂ exposure limits
-- **OTU** calculated as `time × ((ppO₂ − 0.5) / 0.5)^0.83`
+### Open in Xcode
 
-> **Warning**: This app is for dive planning purposes only. All plans must be reviewed by a certified dive professional. Always carry appropriate tables and redundant equipment.
+Open the project/workspace you are using locally and build the `OVMDivePlanner` scheme.
+
+If you regenerate from `project.yml`, make sure Xcode uses:
+
+- Bundle ID: `com.ovm.OVMDivePlanner.OVMDivePlanner`
+- Team ID: `DKA242B3QX`
+- Automatic signing
+
+### Command-Line Generation
+
+If you use XcodeGen:
+
+```bash
+brew install xcodegen
+cd /Users/ferryouwerkerk/Documents/OVMDivePlanner
+xcodegen generate
+```
+
+Then open the generated Xcode project and run the app.
+
+## Testing
+
+The repository includes unit tests for core planner behavior, including:
+
+- pressure/depth conversions
+- gas selection logic
+- no-decompression runtime sanity
+- CCR bailout sanity
+- imperial unit normalization
+
+## App Store Preparation
+
+The project is prepared with:
+
+- explicit marketing version and build number
+- automatic signing enabled in `project.yml`
+- privacy manifest file at `OVMDivePlanner/PrivacyInfo.xcprivacy`
+- app icon asset configuration
+
+Manual App Store steps still required:
+
+- archive in Xcode
+- validate and upload build
+- complete App Store Connect metadata
+- complete the App Privacy questionnaire
+- add screenshots and descriptions
+
+## Safety Notice
+
+This software is a planning tool, not a substitute for proper dive training, dive tables, or certified dive computer procedures.
+
+Every plan should be independently reviewed before use in the water.
