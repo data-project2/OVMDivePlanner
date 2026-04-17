@@ -11,7 +11,7 @@ enum PlannerEditorMode: String, CaseIterable {
 struct PlannerView: View {
     @EnvironmentObject private var vm: DivePlannerViewModel
     @State private var showCCRSettings = false
-    @State private var plannerMode: PlannerEditorMode = .list
+    @State private var plannerMode: PlannerEditorMode = .visual
 
     var body: some View {
         NavigationStack {
