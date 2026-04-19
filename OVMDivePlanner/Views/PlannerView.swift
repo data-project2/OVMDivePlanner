@@ -53,7 +53,8 @@ struct PlannerView: View {
                             levels: $vm.levels,
                             descentRate: vm.descentRate,
                             ascentRate: vm.ascentRate,
-                            unitSystem: vm.unitSystem
+                            unitSystem: vm.unitSystem,
+                            result: vm.results
                         )
                     }
                 } header: {
@@ -417,6 +418,7 @@ struct VisualPlannerView: View {
     let descentRate: Double
     let ascentRate: Double
     let unitSystem: UnitSystem
+    let result: DiveResultData?
 
     private let chartHeight: CGFloat = 260
     private let leftInset: CGFloat = 42
@@ -468,6 +470,7 @@ struct VisualPlannerView: View {
             let plotWidth = max(1, width - leftInset - rightInset)
             let plotHeight = max(1, chartHeight - topInset - bottomInset)
             let profile = profilePoints
+            let decoOverlay = decoOverlayPoints
             let runtime = chartRuntime
             let maxDepthMetric = chartMaxDepthMetric
 
@@ -478,6 +481,8 @@ struct VisualPlannerView: View {
                 grid(plotWidth: plotWidth, plotHeight: plotHeight, maxDepthMetric: maxDepthMetric, runtime: runtime)
 
                 profilePath(profile, plotWidth: plotWidth, plotHeight: plotHeight, maxDepthMetric: maxDepthMetric, runtime: runtime)
+
+                decoPath(decoOverlay, plotWidth: plotWidth, plotHeight: plotHeight, maxDepthMetric: maxDepthMetric, runtime: runtime)
 
                 ForEach(waypointLayouts) { waypoint in
                     Circle()
@@ -563,6 +568,16 @@ struct VisualPlannerView: View {
     }
 
     private func profilePath(_ points: [RuntimeDepthPoint], plotWidth: CGFloat, plotHeight: CGFloat, maxDepthMetric: Double, runtime: Double) -> some View {
+        chartPath(points, plotWidth: plotWidth, plotHeight: plotHeight, maxDepthMetric: maxDepthMetric, runtime: runtime)
+            .stroke(OVMTheme.accent, style: StrokeStyle(lineWidth: 3, lineJoin: .round))
+    }
+
+    private func decoPath(_ points: [RuntimeDepthPoint], plotWidth: CGFloat, plotHeight: CGFloat, maxDepthMetric: Double, runtime: Double) -> some View {
+        chartPath(points, plotWidth: plotWidth, plotHeight: plotHeight, maxDepthMetric: maxDepthMetric, runtime: runtime)
+            .stroke(OVMTheme.danger, style: StrokeStyle(lineWidth: 3, lineJoin: .round))
+    }
+
+    private func chartPath(_ points: [RuntimeDepthPoint], plotWidth: CGFloat, plotHeight: CGFloat, maxDepthMetric: Double, runtime: Double) -> Path {
         Path { path in
             guard let first = points.first else { return }
             path.move(to: CGPoint(
@@ -577,7 +592,6 @@ struct VisualPlannerView: View {
                 ))
             }
         }
-        .stroke(OVMTheme.accent, style: StrokeStyle(lineWidth: 3, lineJoin: .round))
     }
 
     private func xPosition(for runtimeValue: Double, plotWidth: CGFloat, runtime: Double) -> CGFloat {
@@ -657,7 +671,8 @@ struct VisualPlannerView: View {
 
     private var chartMaxDepthMetric: Double {
         let deepestWaypoint = levels.map(\.depth).max() ?? 0
-        return max(minimumMetricChartDepth, deepestWaypoint + 30)
+        let deepestOverlay = decoOverlayPoints.map(\.depth).max() ?? 0
+        return max(minimumMetricChartDepth, max(deepestWaypoint, deepestOverlay) + 30)
     }
 
     private var totalRuntime: Double {
@@ -665,7 +680,8 @@ struct VisualPlannerView: View {
     }
 
     private var chartRuntime: Double {
-        max(minimumChartRuntime, totalRuntime + 30)
+        let overlayRuntime = decoOverlayPoints.last?.runtime ?? 0
+        return max(minimumChartRuntime, max(totalRuntime, overlayRuntime) + 30)
     }
 
     private var waypoints: [DiveLevel] { levels }
@@ -715,6 +731,30 @@ struct VisualPlannerView: View {
 
             currentDepth = level.depth
             currentRuntime = end
+        }
+
+        return deduplicated(points)
+    }
+
+    private var decoOverlayPoints: [RuntimeDepthPoint] {
+        guard
+            let result,
+            !result.schedule.isEmpty
+        else { return [] }
+
+        var points: [RuntimeDepthPoint] = []
+        let ascentStartRuntime = max(profilePoints.last?.runtime ?? 0, result.bottomRuntime)
+        let ascentStartDepth = levels.last?.depth ?? 0
+        points.append(RuntimeDepthPoint(runtime: ascentStartRuntime, depth: ascentStartDepth))
+
+        for stop in result.schedule {
+            let arrivalRuntime = max(ascentStartRuntime, stop.runtime - stop.stopTime)
+            points.append(RuntimeDepthPoint(runtime: arrivalRuntime, depth: stop.depth))
+            points.append(RuntimeDepthPoint(runtime: stop.runtime, depth: stop.depth))
+        }
+
+        if let lastStop = result.schedule.last, result.totalRuntime > lastStop.runtime {
+            points.append(RuntimeDepthPoint(runtime: result.totalRuntime, depth: 0))
         }
 
         return deduplicated(points)
