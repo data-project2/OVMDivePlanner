@@ -54,7 +54,10 @@ struct PlannerView: View {
                             descentRate: vm.descentRate,
                             ascentRate: vm.ascentRate,
                             unitSystem: vm.unitSystem,
-                            result: vm.results
+                            result: vm.results,
+                            hasManualDeco: !vm.manualDecoStopExtensions.isEmpty,
+                            onDecoExtensionChange: vm.setManualDecoExtension,
+                            onResetManualDeco: vm.resetManualDeco
                         )
                     }
                 } header: {
@@ -419,6 +422,9 @@ struct VisualPlannerView: View {
     let ascentRate: Double
     let unitSystem: UnitSystem
     let result: DiveResultData?
+    let hasManualDeco: Bool
+    let onDecoExtensionChange: (Double, Double) -> Void
+    let onResetManualDeco: () -> Void
 
     private let chartHeight: CGFloat = 260
     private let leftInset: CGFloat = 42
@@ -432,6 +438,21 @@ struct VisualPlannerView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             chart
+
+            if !decoStopLayouts.isEmpty {
+                HStack {
+                    Text("Red handles extend deco stops live.")
+                        .font(.caption)
+                        .foregroundStyle(OVMTheme.textSecondary)
+
+                    Spacer()
+
+                    if hasManualDeco {
+                        Button("Reset to Auto Deco", action: onResetManualDeco)
+                            .font(.caption.weight(.semibold))
+                    }
+                }
+            }
 
             ForEach(Array(waypoints.enumerated()), id: \.element.id) { index, waypoint in
                 HStack(spacing: 12) {
@@ -501,6 +522,31 @@ struct VisualPlannerView: View {
                                         plotWidth: plotWidth,
                                         plotHeight: plotHeight,
                                         maxDepthMetric: maxDepthMetric,
+                                        runtime: runtime
+                                    )
+                                }
+                        )
+                }
+
+                ForEach(decoStopLayouts) { stop in
+                    Circle()
+                        .fill(OVMTheme.danger)
+                        .frame(width: 14, height: 14)
+                        .overlay {
+                            Circle()
+                                .stroke(OVMTheme.background, lineWidth: 2)
+                        }
+                        .position(
+                            x: xPosition(for: stop.runtime, plotWidth: plotWidth, runtime: runtime),
+                            y: yPosition(for: stop.depth, plotHeight: plotHeight, maxDepthMetric: maxDepthMetric)
+                        )
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { value in
+                                    updateDecoStop(
+                                        stop,
+                                        location: value.location,
+                                        plotWidth: plotWidth,
                                         runtime: runtime
                                     )
                                 }
@@ -625,6 +671,20 @@ struct VisualPlannerView: View {
 
         levels[index].depth = unitSystem.normalizeMetricProfileDepth(metricDepth)
         levels[index].time = holdTime.rounded()
+    }
+
+    private func updateDecoStop(
+        _ stop: DecoStopLayout,
+        location: CGPoint,
+        plotWidth: CGFloat,
+        runtime: Double
+    ) {
+        let minimumRuntime = stop.arrivalRuntime + stop.autoStopTime
+        let clampedX = min(max(location.x, leftInset), leftInset + plotWidth)
+        let draggedRuntime = Double((clampedX - leftInset) / plotWidth) * runtime
+        let adjustedRuntime = max(minimumRuntime, draggedRuntime)
+        let extraTime = adjustedRuntime - minimumRuntime
+        onDecoExtensionChange(stop.depth, extraTime)
     }
 
     private func addWaypoint(at location: CGPoint, plotWidth: CGFloat, plotHeight: CGFloat, runtime: Double, maxDepthMetric: Double) {
@@ -760,6 +820,19 @@ struct VisualPlannerView: View {
         return deduplicated(points)
     }
 
+    private var decoStopLayouts: [DecoStopLayout] {
+        guard let result else { return [] }
+
+        return result.schedule.map { stop in
+            DecoStopLayout(
+                depth: stop.depth,
+                arrivalRuntime: max(result.bottomRuntime, stop.runtime - stop.stopTime),
+                runtime: stop.runtime,
+                autoStopTime: stop.autoStopTime
+            )
+        }
+    }
+
     private func deduplicated(_ points: [RuntimeDepthPoint]) -> [RuntimeDepthPoint] {
         var result: [RuntimeDepthPoint] = []
         for point in points {
@@ -783,4 +856,13 @@ private struct WaypointLayout: Identifiable {
     let arrivalRuntime: Double
     let endRuntime: Double
     let handleRuntime: Double
+}
+
+private struct DecoStopLayout: Identifiable {
+    let depth: Double
+    let arrivalRuntime: Double
+    let runtime: Double
+    let autoStopTime: Double
+
+    var id: String { "\(Int(depth.rounded()))-\(Int(arrivalRuntime.rounded()))" }
 }

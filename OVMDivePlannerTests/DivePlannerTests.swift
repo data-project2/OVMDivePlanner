@@ -82,4 +82,81 @@ final class DivePlannerTests: XCTestCase {
         XCTAssertEqual(UnitSystem.imperial.rate(metricRate), 35, accuracy: 0.0001)
         XCTAssertEqual(UnitSystem.imperial.volume(metricVolume), 0.5, accuracy: 0.0001)
     }
+
+    func testManualDecoExtensionIncreasesSelectedStopAndRuntime() throws {
+        let baseInput = DivePlanInput(
+            circuitType: .oc,
+            levels: [DiveLevel(depth: 45, time: 25)],
+            descentRate: 20,
+            ascentRate: 9,
+            transitInclusive: true,
+            bottomGas: GasMix(fO2: 0.18, fHe: 0.35),
+            decoGases: [
+                GasMix(fO2: 0.50, fHe: 0),
+                GasMix(fO2: 1.00, fHe: 0)
+            ],
+            waterType: .salt,
+            surfacePressure: 1.013,
+            gfLow: 35,
+            gfHigh: 70,
+            lastStopDepth: 3,
+            sacBottom: 20,
+            sacDeco: 15
+        )
+
+        let autoResult = planDive(input: baseInput)
+        let stopToExtend = try XCTUnwrap(autoResult.schedule.first)
+
+        var extendedInput = baseInput
+        extendedInput.manualDecoStopExtensions = [String(Int(stopToExtend.depth.rounded())): 3]
+
+        let extendedResult = planDive(input: extendedInput)
+        let extendedStop = try XCTUnwrap(extendedResult.schedule.first(where: {
+            abs($0.depth - stopToExtend.depth) < 0.0001
+        }))
+
+        XCTAssertEqual(extendedStop.autoStopTime, stopToExtend.stopTime, accuracy: 0.0001)
+        XCTAssertEqual(extendedStop.extraTime, 3, accuracy: 0.0001)
+        XCTAssertEqual(extendedStop.stopTime, stopToExtend.stopTime + 3, accuracy: 0.0001)
+        XCTAssertGreaterThanOrEqual(extendedResult.totalRuntime, autoResult.totalRuntime + 3)
+    }
+
+    func testZeroManualDecoExtensionMatchesAutoSchedule() {
+        let baseInput = DivePlanInput(
+            circuitType: .oc,
+            levels: [DiveLevel(depth: 45, time: 25)],
+            descentRate: 20,
+            ascentRate: 9,
+            transitInclusive: true,
+            bottomGas: GasMix(fO2: 0.18, fHe: 0.35),
+            decoGases: [
+                GasMix(fO2: 0.50, fHe: 0),
+                GasMix(fO2: 1.00, fHe: 0)
+            ],
+            waterType: .salt,
+            surfacePressure: 1.013,
+            gfLow: 35,
+            gfHigh: 70,
+            lastStopDepth: 3,
+            sacBottom: 20,
+            sacDeco: 15
+        )
+
+        let autoResult = planDive(input: baseInput)
+
+        var resetInput = baseInput
+        resetInput.manualDecoStopExtensions = ["6": 0]
+
+        let resetResult = planDive(input: resetInput)
+
+        XCTAssertEqual(resetResult.schedule.count, autoResult.schedule.count)
+        XCTAssertEqual(resetResult.totalRuntime, autoResult.totalRuntime, accuracy: 0.0001)
+
+        for (resetStop, autoStop) in zip(resetResult.schedule, autoResult.schedule) {
+            XCTAssertEqual(resetStop.depth, autoStop.depth, accuracy: 0.0001)
+            XCTAssertEqual(resetStop.stopTime, autoStop.stopTime, accuracy: 0.0001)
+            XCTAssertEqual(resetStop.autoStopTime, autoStop.autoStopTime, accuracy: 0.0001)
+            XCTAssertEqual(resetStop.extraTime, autoStop.extraTime, accuracy: 0.0001)
+        }
+    }
 }

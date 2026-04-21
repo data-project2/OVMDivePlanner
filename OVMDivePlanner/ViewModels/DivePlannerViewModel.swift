@@ -241,9 +241,12 @@ class DivePlannerViewModel: ObservableObject {
         let input = buildInput()
 
         Task(priority: .userInitiated) { [weak self] in
-            guard let self else { return }
-            self.results = planDive(input: input)
-            self.isCalculating = false
+            let recalculated = planDive(input: input)
+            await MainActor.run {
+                guard let self else { return }
+                self.results = recalculated
+                self.isCalculating = false
+            }
         }
     }
 
