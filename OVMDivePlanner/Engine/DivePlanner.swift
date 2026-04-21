@@ -152,6 +152,14 @@ func planDive(input: DivePlanInput, initialTissues: TissueState? = nil,
         gasUsageDict[label, default: 0] += sac * p * time
     }
 
+    func decoExtensionMinutes(at depth: Double) -> Double {
+
+        let key = String(Int(depth.rounded()))
+
+        return max(0, input.manualDecoStopExtensions[key] ?? 0)
+
+    }
+
     func trackSeg(_ avgDepth: Double, _ time: Double, _ ppO2: Double) {
         guard time > 0 else { return }
         let lim = cnsLimit(ppO2)
@@ -268,8 +276,21 @@ func planDive(input: DivePlanInput, initialTissues: TissueState? = nil,
                 if stopTime > 999 { warnings.append("Stop at \(Int(sd))m exceeded 999 min."); break }
             }
 
+            let autoStopTime = stopTime
+
+            let extraStopTime = decoExtensionMinutes(at: sd)
+
+            if extraStopTime > 0 {
+
+                tissues.applyConstant(ambient: pStop, fN2: g.fN2, fHe: g.fHe, time: extraStopTime)
+
+                stopTime += extraStopTime
+                runtime += extraStopTime
+
+            }
+
             if stopTime > 0 {
-                schedule.append(DecoStop(depth: sd, stopTime: stopTime, runtime: ceil(runtime), gas: glabel))
+                schedule.append(DecoStop(depth: sd, stopTime: stopTime, runtime: ceil(runtime), gas: glabel, autoStopTime: autoStopTime, extraTime: extraStopTime))
                 addUsage(glabel, sd, stopTime, input.sacDeco)
                 trackSeg(sd, stopTime, ppO2At(sd, "deco"))
             }
@@ -454,7 +475,7 @@ func computeBailout(tissues: TissueState, depth: Double, preparedDeco: [Prepared
             }
 
             if stopTime > 0 {
-                schedule.append(DecoStop(depth: sd, stopTime: stopTime, runtime: ceil(runtime), gas: g.label))
+                schedule.append(DecoStop(depth: sd, stopTime: stopTime, runtime: ceil(runtime), gas: g.label, autoStopTime: stopTime, extraTime: 0))
                 addUsage(g.label, sd, stopTime, sacDeco)
                 trackSeg(sd, stopTime, g.fO2)
             }

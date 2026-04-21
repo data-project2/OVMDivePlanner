@@ -139,6 +139,7 @@ struct DivePlanInput: Codable {
     // Gas
     var bottomGas: GasMix = .air
     var decoGases: [GasMix] = []
+    var manualDecoStopExtensions: [String: Double] = [:]
 
     // Settings
     var waterType: WaterType = .salt
@@ -165,6 +166,8 @@ struct DecoStop: Identifiable {
     var stopTime: Double
     var runtime: Double
     var gas: String
+    var autoStopTime: Double = 0
+    var extraTime: Double = 0
 }
 
 struct GasUsageEntry: Identifiable {

@@ -33,6 +33,7 @@ class DivePlannerViewModel: ObservableObject {
     @Published var levels: [DiveLevel] = [DiveLevel(depth: 30, time: 20)]
     @Published var bottomGas: GasMix = GasMix.air
     @Published var decoGases: [GasMix] = []
+    @Published var manualDecoStopExtensions: [String: Double] = [:]
 
     // CCR
     @Published var diluent: GasMix = GasMix.air
@@ -104,6 +105,7 @@ class DivePlannerViewModel: ObservableObject {
         errorMessage = nil
         results = nil
         results2 = nil
+        manualDecoStopExtensions = [:]
 
         let input = buildInput()
         let input2: DivePlanInput? = enableRepetitive ? buildInput(isSecond: true) : nil
@@ -131,6 +133,25 @@ class DivePlannerViewModel: ObservableObject {
 
     func addDecoGas2() { decoGases2.append(GasMix(fO2: 0.32, fHe: 0)) }
     func removeDecoGas2(at offsets: IndexSet) { decoGases2.remove(atOffsets: offsets) }
+
+    func resetManualDeco() {
+        guard !manualDecoStopExtensions.isEmpty else { return }
+        manualDecoStopExtensions = [:]
+        recalculateManualDeco()
+    }
+
+    func setManualDecoExtension(depth: Double, extraTime: Double) {
+        let key = String(Int(depth.rounded()))
+        let normalized = max(0, extraTime.rounded())
+
+        if normalized == 0 {
+            manualDecoStopExtensions.removeValue(forKey: key)
+        } else {
+            manualDecoStopExtensions[key] = normalized
+        }
+
+        recalculateManualDeco()
+    }
 
     // MARK: – Private helpers
 
@@ -169,6 +190,7 @@ class DivePlannerViewModel: ObservableObject {
             transitInclusive: transitInclusive,
             bottomGas: isSecond ? bottomGas2 : bottomGas,
             decoGases: isSecond ? decoGases2 : decoGases,
+            manualDecoStopExtensions: isSecond ? [:] : manualDecoStopExtensions,
             waterType: waterType,
             surfacePressure: surfacePressure,
             gfLow: gfLow,
@@ -210,6 +232,19 @@ class DivePlannerViewModel: ObservableObject {
             fHe: gas.fHe,
             switchDepth: unitSystem.normalizeMetricSwitchDepth(switchDepth)
         )
+    }
+
+    private func recalculateManualDeco() {
+        guard results != nil else { return }
+
+        isCalculating = true
+        let input = buildInput()
+
+        Task(priority: .userInitiated) { [weak self] in
+            guard let self else { return }
+            self.results = planDive(input: input)
+            self.isCalculating = false
+        }
     }
 
     private func persistSettings() {
