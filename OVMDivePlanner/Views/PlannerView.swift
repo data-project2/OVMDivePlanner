@@ -331,6 +331,17 @@ struct GasPickerRow: View {
                 }
             }
         }
+        .toolbar {
+            if focusedField == .switchDepth {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") {
+                        updateGas()
+                        focusedField = nil
+                    }
+                }
+            }
+        }
         .onAppear { syncFromGas() }
         .onChange(of: gas) { _ in syncFromGas() }
         .onChange(of: focusedField) { field in

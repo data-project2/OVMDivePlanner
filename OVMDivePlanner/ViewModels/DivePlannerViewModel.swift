@@ -35,7 +35,6 @@ class DivePlannerViewModel: ObservableObject {
     @Published var decoGases: [GasMix] = []
 
     // CCR
-    @Published var diluent: GasMix = GasMix.air
     @Published var setpointLow: Double = 0.7 {
         didSet { persistSettings() }
     }
