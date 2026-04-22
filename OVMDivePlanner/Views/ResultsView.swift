@@ -18,11 +18,27 @@ struct ResultsView: View {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 20) {
                             if !r.warnings.isEmpty { WarningsBox(warnings: r.warnings) }
-                            DiveResultCard(title: "Dive 1", levels: vm.levels, result: r, unitSystem: vm.unitSystem)
+                            DiveResultCard(
+                                title: "Dive 1",
+                                levels: vm.levels,
+                                result: r,
+                                unitSystem: vm.unitSystem,
+                                descentRate: vm.descentRate,
+                                ascentRate: vm.ascentRate,
+                                transitInclusive: vm.transitInclusive
+                            )
                             if let r2 = vm.results2 {
                                 Divider()
                                 if !r2.warnings.isEmpty { WarningsBox(warnings: r2.warnings) }
-                                DiveResultCard(title: "Dive 2", levels: vm.levels2, result: r2, unitSystem: vm.unitSystem)
+                                DiveResultCard(
+                                    title: "Dive 2",
+                                    levels: vm.levels2,
+                                    result: r2,
+                                    unitSystem: vm.unitSystem,
+                                    descentRate: vm.descentRate,
+                                    ascentRate: vm.ascentRate,
+                                    transitInclusive: vm.transitInclusive
+                                )
                             }
                         }
                         .padding()
@@ -77,6 +93,9 @@ struct DiveResultCard: View {
 
     let result: DiveResultData
     let unitSystem: UnitSystem
+    let descentRate: Double
+    let ascentRate: Double
+    let transitInclusive: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -96,7 +115,13 @@ struct DiveResultCard: View {
 
             if !levels.isEmpty {
                 Text("Dive Profile").font(.headline)
-                DiveProfileTable(levels: levels, unitSystem: unitSystem)
+                DiveProfileTable(
+                    levels: levels,
+                    unitSystem: unitSystem,
+                    descentRate: descentRate,
+                    ascentRate: ascentRate,
+                    transitInclusive: transitInclusive
+                )
             }
 
             // Deco schedule
@@ -164,6 +189,9 @@ struct SummaryCell: View {
 struct DiveProfileTable: View {
     let levels: [DiveLevel]
     let unitSystem: UnitSystem
+    let descentRate: Double
+    let ascentRate: Double
+    let transitInclusive: Bool
 
     var body: some View {
         VStack(spacing: 0) {
@@ -181,7 +209,7 @@ struct DiveProfileTable: View {
                     Text("\(index + 1)").frame(maxWidth: .infinity)
                     Text(unitSystem == .metric ? "\(Int(level.depth.rounded())) m" : "\(Int(unitSystem.depth(level.depth).rounded())) ft").frame(maxWidth: .infinity)
                     Text("\(Int(level.time)) min").frame(maxWidth: .infinity)
-                    Text("\(Int(runtimeThroughLevel(at: index))) min").frame(maxWidth: .infinity)
+                    Text(runtimeString(runtimeThroughLevel(at: index))).frame(maxWidth: .infinity)
                 }
                 .padding(.vertical, 4)
                 Divider()
@@ -192,7 +220,24 @@ struct DiveProfileTable: View {
     }
 
     private func runtimeThroughLevel(at index: Int) -> Double {
-        levels.prefix(index + 1).reduce(0) { $0 + $1.time }
+        var runtime = 0.0
+        var currentDepth = 0.0
+
+        for level in levels.prefix(index + 1) {
+            let diff = abs(level.depth - currentDepth)
+            let rate = level.depth >= currentDepth ? descentRate : ascentRate
+            let transitTime = diff > 0 ? diff / rate : 0
+            let bottomTime = transitInclusive ? max(0, level.time - transitTime) : level.time
+
+            runtime += transitTime + bottomTime
+            currentDepth = level.depth
+        }
+
+        return runtime
+    }
+
+    private func runtimeString(_ runtime: Double) -> String {
+        "\(Int(ceil(runtime))) min"
     }
 }
 
