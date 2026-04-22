@@ -14,89 +14,117 @@ struct PlannerView: View {
     @EnvironmentObject private var vm: DivePlannerViewModel
     @State private var showCCRSettings = false
     @State private var plannerMode: PlannerEditorMode = .visual
+    @State private var isCircuitExpanded = true
+    @State private var isPlannerModeExpanded = false
+    @State private var isProfileExpanded = true
+    @State private var isBottomGasExpanded = true
+    @State private var isDecoGasesExpanded = true
+    @State private var isRepetitiveExpanded = false
 
     var body: some View {
         NavigationStack {
             Form {
                 // Circuit type
-                Section("Circuit") {
-                    Picker("Circuit", selection: $vm.circuitType) {
-                        Text("Open Circuit").tag(CircuitType.oc)
-                        Text("CCR (Closed Circuit)").tag(CircuitType.ccr)
-                    }
-                    .pickerStyle(.segmented)
+                Section {
+                    if isCircuitExpanded {
+                        Picker("Circuit", selection: $vm.circuitType) {
+                            Text("Open Circuit").tag(CircuitType.oc)
+                            Text("CCR (Closed Circuit)").tag(CircuitType.ccr)
+                        }
+                        .pickerStyle(.segmented)
 
-                    if vm.circuitType == .ccr {
-                        Button("CCR Settings…") { showCCRSettings = true }
-                    }
-                }
-
-                Section("Planner Mode") {
-                    Picker("Planner Mode", selection: $plannerMode) {
-                        ForEach(PlannerEditorMode.allCases, id: \.self) { mode in
-                            Text(mode.rawValue).tag(mode)
+                        if vm.circuitType == .ccr {
+                            Button("CCR Settings…") { showCCRSettings = true }
                         }
                     }
-                    .pickerStyle(.segmented)
+                } header: {
+                    collapsibleHeader("Circuit", isExpanded: $isCircuitExpanded)
+                }
+
+                Section {
+                    if isPlannerModeExpanded {
+                        Picker("Planner Mode", selection: $plannerMode) {
+                            ForEach(PlannerEditorMode.allCases, id: \.self) { mode in
+                                Text(mode.rawValue).tag(mode)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    }
+                } header: {
+                    collapsibleHeader("Planner Mode", isExpanded: $isPlannerModeExpanded)
                 }
 
                 // Dive levels
                 Section {
-                    if plannerMode == .list {
-                        ForEach($vm.levels) { $level in
-                            LevelRow(level: $level, unitSystem: vm.unitSystem)
+                    if isProfileExpanded {
+                        if plannerMode == .list {
+                            ForEach($vm.levels) { $level in
+                                LevelRow(level: $level, unitSystem: vm.unitSystem)
+                            }
+                            .onDelete(perform: vm.removeLevel)
+                            Button(action: vm.addLevel) {
+                                Label("Add Level", systemImage: "plus.circle")
+                            }
+                        } else {
+                            VisualPlannerView(
+                                levels: $vm.levels,
+                                descentRate: vm.descentRate,
+                                ascentRate: vm.ascentRate,
+                                unitSystem: vm.unitSystem,
+                                result: vm.results
+                            )
                         }
-                        .onDelete(perform: vm.removeLevel)
-                        Button(action: vm.addLevel) {
-                            Label("Add Level", systemImage: "plus.circle")
-                        }
-                    } else {
-                        VisualPlannerView(
-                            levels: $vm.levels,
-                            descentRate: vm.descentRate,
-                            ascentRate: vm.ascentRate,
-                            unitSystem: vm.unitSystem,
-                            result: vm.results
-                        )
                     }
                 } header: {
-                    Text("Dive Profile (\(vm.unitSystem.depthUnit) / min)")
+                    collapsibleHeader("Dive Profile (\(vm.unitSystem.depthUnit) / min)", isExpanded: $isProfileExpanded)
                 } footer: {
-                    Text(plannerMode == .list
-                         ? "Levels are processed top-to-bottom. Transit between levels uses descent/ascent rates from Settings."
-                         : "Tap the chart to add a waypoint. Drag waypoint handles vertically to change depth. Hold time is edited below the chart.")
+                    if isProfileExpanded {
+                        Text(plannerMode == .list
+                             ? "Levels are processed top-to-bottom. Transit between levels uses descent/ascent rates from Settings."
+                             : "Tap the chart to add a waypoint. Drag waypoint handles vertically to change depth. Hold time is edited below the chart.")
+                    }
                 }
 
                 // Bottom gas
-                Section(vm.circuitType == .ccr ? "Diluent Gas" : "Bottom Gas") {
-                    GasPickerRow(gas: $vm.bottomGas, showSwitch: false, unitSystem: vm.unitSystem)
+                Section {
+                    if isBottomGasExpanded {
+                        GasPickerRow(gas: $vm.bottomGas, showSwitch: false, unitSystem: vm.unitSystem)
+                    }
+                } header: {
+                    collapsibleHeader(vm.circuitType == .ccr ? "Diluent Gas" : "Bottom Gas", isExpanded: $isBottomGasExpanded)
                 }
 
                 // Deco gases (OC only)
                 if vm.circuitType == .oc {
                     Section {
-                        ForEach($vm.decoGases) { $g in
-                            GasPickerRow(gas: $g, showSwitch: true, unitSystem: vm.unitSystem)
-                        }
-                        .onDelete(perform: vm.removeDecoGas)
-                        Button(action: vm.addDecoGas) {
-                            Label("Add Deco Gas", systemImage: "plus.circle")
+                        if isDecoGasesExpanded {
+                            ForEach($vm.decoGases) { $g in
+                                GasPickerRow(gas: $g, showSwitch: true, unitSystem: vm.unitSystem)
+                            }
+                            .onDelete(perform: vm.removeDecoGas)
+                            Button(action: vm.addDecoGas) {
+                                Label("Add Deco Gas", systemImage: "plus.circle")
+                            }
                         }
                     } header: {
-                        Text("Deco Gases")
+                        collapsibleHeader("Deco Gases", isExpanded: $isDecoGasesExpanded)
                     } footer: {
-                        Text("Leave switch depth empty to auto-calculate from ppO₂ 1.6.")
+                        if isDecoGasesExpanded {
+                            Text("Leave switch depth empty to auto-calculate from ppO₂ 1.6.")
+                        }
                     }
                 }
 
                 // Repetitive dive
                 Section {
-                    Toggle("Enable Repetitive Dive", isOn: $vm.enableRepetitive)
-                    if vm.enableRepetitive {
-                        RepetitiveDiveView()
+                    if isRepetitiveExpanded {
+                        Toggle("Enable Repetitive Dive", isOn: $vm.enableRepetitive)
+                        if vm.enableRepetitive {
+                            RepetitiveDiveView()
+                        }
                     }
                 } header: {
-                    Text("Repetitive Dive")
+                    collapsibleHeader("Repetitive Dive", isExpanded: $isRepetitiveExpanded)
                 }
 
                 // Calculate button
@@ -125,6 +153,24 @@ struct PlannerView: View {
             CCRSettingsSheet()
                 .environmentObject(vm)
         }
+    }
+
+    @ViewBuilder
+    private func collapsibleHeader(_ title: String, isExpanded: Binding<Bool>) -> some View {
+        Button {
+            isExpanded.wrappedValue.toggle()
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: isExpanded.wrappedValue ? "chevron.down.circle.fill" : "chevron.right.circle")
+                    .foregroundStyle(OVMTheme.accent)
+                Text(title)
+                    .foregroundStyle(OVMTheme.textPrimary)
+                Spacer()
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .textCase(nil)
     }
 }
 
