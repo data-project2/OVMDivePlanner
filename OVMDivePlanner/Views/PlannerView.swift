@@ -504,7 +504,10 @@ struct VisualPlannerView: View {
                         deleteWaypoint(id: waypoint.id)
                     } label: {
                         Image(systemName: "trash")
+                            .frame(width: 32, height: 32)
+                            .contentShape(Rectangle())
                     }
+                    .buttonStyle(.borderless)
                     .disabled(levels.count <= 1)
                 }
             }
