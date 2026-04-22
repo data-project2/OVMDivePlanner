@@ -140,6 +140,14 @@ class DivePlannerViewModel: ObservableObject {
         recalculateManualDeco()
     }
 
+    func clearCalculatedDeco() {
+        manualDecoStopExtensions = [:]
+        results = nil
+        results2 = nil
+        errorMessage = nil
+        isCalculating = false
+    }
+
     func setManualDecoExtension(depth: Double, extraTime: Double) {
         let key = String(Int(depth.rounded()))
         let normalized = max(0, extraTime.rounded())

@@ -8,6 +8,8 @@ enum PlannerEditorMode: String, CaseIterable {
     case visual = "Visual"
 }
 
+private let plannerMaxDepthMetric = 200.0
+
 struct PlannerView: View {
     @EnvironmentObject private var vm: DivePlannerViewModel
     @State private var showCCRSettings = false
@@ -57,7 +59,8 @@ struct PlannerView: View {
                             result: vm.results,
                             hasManualDeco: !vm.manualDecoStopExtensions.isEmpty,
                             onDecoExtensionChange: vm.setManualDecoExtension,
-                            onResetManualDeco: vm.resetManualDeco
+                            onResetManualDeco: vm.resetManualDeco,
+                            onClearDeco: vm.clearCalculatedDeco
                         )
                     }
                 } header: {
@@ -136,7 +139,12 @@ struct LevelRow: View {
     let unitSystem: UnitSystem
 
     private var depthChoices: [Int] {
-        unitSystem == .metric ? Array(0...300) : Array(stride(from: 0, through: 1000, by: 10))
+        if unitSystem == .metric {
+            return Array(0...Int(plannerMaxDepthMetric))
+        }
+
+        let maxImperialDepth = Int((plannerMaxDepthMetric * 3.28084).rounded())
+        return Array(stride(from: 0, through: maxImperialDepth, by: 10))
     }
 
     private var displayedDepth: Binding<Double> {
@@ -146,7 +154,7 @@ struct LevelRow: View {
                 let nearest = depthChoices.min { abs(Double($0) - displayDepth) < abs(Double($1) - displayDepth) } ?? 0
                 return Double(nearest)
             },
-            set: { level.depth = unitSystem.normalizeMetricProfileDepth(unitSystem.metricDepth($0)) }
+            set: { level.depth = unitSystem.normalizeMetricProfileDepth(min(unitSystem.metricDepth($0), plannerMaxDepthMetric)) }
         )
     }
 
@@ -425,6 +433,7 @@ struct VisualPlannerView: View {
     let hasManualDeco: Bool
     let onDecoExtensionChange: (Double, Double) -> Void
     let onResetManualDeco: () -> Void
+    let onClearDeco: () -> Void
 
     @State private var activeDecoStopID: String?
 
@@ -454,12 +463,44 @@ struct VisualPlannerView: View {
                             Button("Reset to Auto Deco", action: onResetManualDeco)
                                 .font(.caption.weight(.semibold))
                         }
+
+                        if result != nil {
+                            Button("Clear Deco", action: onClearDeco)
+                                .font(.caption.weight(.semibold))
+                        }
                     }
 
                     if let activeStop = activeDecoStop {
                         Text(decoStatusText(for: activeStop))
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(OVMTheme.danger)
+                    }
+                }
+            }
+
+            if !decoStopLayouts.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Deco Stops")
+                        .font(.subheadline.weight(.semibold))
+
+                    ForEach(decoStopLayouts) { stop in
+                        HStack(spacing: 12) {
+                            Text(depthLabel(for: stop.depth))
+                                .frame(width: 60, alignment: .leading)
+
+                            Text("Auto \(Int(stop.autoStopTime.rounded())) min")
+                                .font(.caption)
+                                .foregroundStyle(OVMTheme.textSecondary)
+                                .frame(width: 90, alignment: .leading)
+
+                            Stepper(
+                                value: extraTimeBinding(for: stop),
+                                in: 0...120,
+                                step: 1
+                            ) {
+                                Text("Manual +\(Int(stop.extraTime.rounded())) min")
+                            }
+                        }
                     }
                 }
             }
@@ -527,8 +568,8 @@ struct VisualPlannerView: View {
                             DragGesture(minimumDistance: 0)
                                 .onChanged { value in
                                     updateWaypoint(
-                                        for: waypoint.id,
-                                        location: value.location,
+                                        waypoint,
+                                        translation: value.translation,
                                         plotWidth: plotWidth,
                                         plotHeight: plotHeight,
                                         maxDepthMetric: maxDepthMetric,
@@ -570,7 +611,7 @@ struct VisualPlannerView: View {
                                 activeDecoStopID = stop.id
                                 updateDecoStop(
                                     stop,
-                                    location: value.location,
+                                    translation: value.translation,
                                     plotWidth: plotWidth,
                                     runtime: runtime
                                 )
@@ -685,25 +726,23 @@ struct VisualPlannerView: View {
     }
 
     private func updateWaypoint(
-        for id: UUID,
-        location: CGPoint,
+        _ waypoint: WaypointLayout,
+        translation: CGSize,
         plotWidth: CGFloat,
         plotHeight: CGFloat,
         maxDepthMetric: Double,
         runtime: Double
     ) {
         guard
-            let index = levels.firstIndex(where: { $0.id == id }),
-            let layout = waypointLayouts.first(where: { $0.id == id })
+            let index = levels.firstIndex(where: { $0.id == waypoint.id })
         else { return }
 
-        let clampedX = min(max(location.x, leftInset), leftInset + plotWidth)
-        let draggedRuntime = Double((clampedX - leftInset) / plotWidth) * runtime
-        let holdTime = max(0, draggedRuntime - layout.arrivalRuntime)
+        let runtimeDelta = Double(translation.width / max(plotWidth, 1)) * runtime
+        let draggedRuntime = min(max(waypoint.endRuntime + runtimeDelta, waypoint.arrivalRuntime), runtime)
+        let holdTime = max(0, draggedRuntime - waypoint.arrivalRuntime)
 
-        let clampedY = min(max(location.y, topInset), topInset + plotHeight)
-        let depthFraction = Double((clampedY - topInset) / plotHeight)
-        let metricDepth = depthFraction * maxDepthMetric
+        let depthDelta = Double(translation.height / max(plotHeight, 1)) * maxDepthMetric
+        let metricDepth = min(max(waypoint.depth + depthDelta, 0), min(maxDepthMetric, plannerMaxDepthMetric))
 
         levels[index].depth = unitSystem.normalizeMetricProfileDepth(metricDepth)
         levels[index].time = holdTime.rounded()
@@ -711,13 +750,13 @@ struct VisualPlannerView: View {
 
     private func updateDecoStop(
         _ stop: DecoStopLayout,
-        location: CGPoint,
+        translation: CGSize,
         plotWidth: CGFloat,
         runtime: Double
     ) {
         let minimumRuntime = stop.arrivalRuntime + stop.autoStopTime
-        let clampedX = min(max(location.x, leftInset), leftInset + plotWidth)
-        let draggedRuntime = Double((clampedX - leftInset) / plotWidth) * runtime
+        let runtimeDelta = Double(translation.width / max(plotWidth, 1)) * runtime
+        let draggedRuntime = min(max(stop.runtime + runtimeDelta, minimumRuntime), runtime)
         let adjustedRuntime = max(minimumRuntime, draggedRuntime)
         let extraTime = adjustedRuntime - minimumRuntime
         onDecoExtensionChange(stop.depth, extraTime)
@@ -740,7 +779,7 @@ struct VisualPlannerView: View {
     private func addWaypoint(at location: CGPoint, plotWidth: CGFloat, plotHeight: CGFloat, runtime: Double, maxDepthMetric: Double) {
         let clampedY = min(max(location.y, topInset), topInset + plotHeight)
         let depthFraction = Double((clampedY - topInset) / plotHeight)
-        let metricDepth = unitSystem.normalizeMetricProfileDepth(depthFraction * maxDepthMetric)
+        let metricDepth = unitSystem.normalizeMetricProfileDepth(min(depthFraction * maxDepthMetric, plannerMaxDepthMetric))
         let insertIndex = insertionIndex(for: location.x, plotWidth: plotWidth, runtime: runtime)
         let waypoint = DiveLevel(depth: metricDepth, time: defaultHoldTime)
         levels.insert(waypoint, at: insertIndex)
@@ -753,7 +792,7 @@ struct VisualPlannerView: View {
     }
 
     private func appendWaypoint() {
-        let lastDepth = levels.last?.depth ?? 0
+        let lastDepth = min(levels.last?.depth ?? 0, plannerMaxDepthMetric)
         levels.append(DiveLevel(depth: lastDepth, time: defaultHoldTime))
     }
 
@@ -772,6 +811,15 @@ struct VisualPlannerView: View {
         )
     }
 
+    private func extraTimeBinding(for stop: DecoStopLayout) -> Binding<Double> {
+        Binding(
+            get: { stop.extraTime },
+            set: { newValue in
+                onDecoExtensionChange(stop.depth, newValue)
+            }
+        )
+    }
+
     private func depthLabel(for metricDepth: Double) -> String {
         let displayDepth = unitSystem.depth(metricDepth)
         return unitSystem == .metric
@@ -782,7 +830,7 @@ struct VisualPlannerView: View {
     private var chartMaxDepthMetric: Double {
         let deepestWaypoint = levels.map(\.depth).max() ?? 0
         let deepestOverlay = decoOverlayPoints.map(\.depth).max() ?? 0
-        return max(minimumMetricChartDepth, max(deepestWaypoint, deepestOverlay) + 30)
+        return min(plannerMaxDepthMetric, max(minimumMetricChartDepth, max(deepestWaypoint, deepestOverlay) + 30))
     }
 
     private var totalRuntime: Double {
