@@ -744,7 +744,7 @@ struct VisualPlannerView: View {
         let depthDelta = Double(translation.height / max(plotHeight, 1)) * maxDepthMetric
         let metricDepth = min(max(waypoint.depth + depthDelta, 0), min(maxDepthMetric, plannerMaxDepthMetric))
 
-        levels[index].depth = unitSystem.normalizeMetricProfileDepth(metricDepth)
+        levels[index].depth = unitSystem.normalizeMetricProfileDepth(min(metricDepth, plannerMaxDepthMetric))
         levels[index].time = holdTime.rounded()
     }
 
