@@ -426,6 +426,8 @@ struct VisualPlannerView: View {
     let onDecoExtensionChange: (Double, Double) -> Void
     let onResetManualDeco: () -> Void
 
+    @State private var activeDecoStopID: String?
+
     private let chartHeight: CGFloat = 260
     private let leftInset: CGFloat = 42
     private let rightInset: CGFloat = 12
@@ -440,16 +442,24 @@ struct VisualPlannerView: View {
             chart
 
             if !decoStopLayouts.isEmpty {
-                HStack {
-                    Text("Red handles extend deco stops live.")
-                        .font(.caption)
-                        .foregroundStyle(OVMTheme.textSecondary)
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text("Drag red handles to extend deco stops. Later stops may shorten automatically.")
+                            .font(.caption)
+                            .foregroundStyle(OVMTheme.textSecondary)
 
-                    Spacer()
+                        Spacer()
 
-                    if hasManualDeco {
-                        Button("Reset to Auto Deco", action: onResetManualDeco)
+                        if hasManualDeco {
+                            Button("Reset to Auto Deco", action: onResetManualDeco)
+                                .font(.caption.weight(.semibold))
+                        }
+                    }
+
+                    if let activeStop = activeDecoStop {
+                        Text(decoStatusText(for: activeStop))
                             .font(.caption.weight(.semibold))
+                            .foregroundStyle(OVMTheme.danger)
                     }
                 }
             }
@@ -529,28 +539,54 @@ struct VisualPlannerView: View {
                 }
 
                 ForEach(decoStopLayouts) { stop in
-                    Circle()
-                        .fill(OVMTheme.danger)
-                        .frame(width: 14, height: 14)
-                        .overlay {
-                            Circle()
-                                .stroke(OVMTheme.background, lineWidth: 2)
+                    ZStack {
+                        Circle()
+                            .fill(OVMTheme.danger.opacity(activeDecoStopID == stop.id ? 0.18 : 0.001))
+                            .frame(width: 34, height: 34)
+
+                        Circle()
+                            .fill(OVMTheme.danger)
+                            .frame(width: activeDecoStopID == stop.id ? 18 : 14, height: activeDecoStopID == stop.id ? 18 : 14)
+                            .overlay {
+                                Circle()
+                                    .stroke(OVMTheme.background, lineWidth: 2)
+                            }
+
+                        if activeDecoStopID == stop.id {
+                            Text("\(Int(stop.stopTime.rounded()))")
+                                .font(.caption2.weight(.bold))
+                                .foregroundStyle(.white)
+                                .offset(y: -18)
                         }
-                        .position(
-                            x: xPosition(for: stop.runtime, plotWidth: plotWidth, runtime: runtime),
-                            y: yPosition(for: stop.depth, plotHeight: plotHeight, maxDepthMetric: maxDepthMetric)
-                        )
-                        .gesture(
-                            DragGesture(minimumDistance: 0)
-                                .onChanged { value in
-                                    updateDecoStop(
-                                        stop,
-                                        location: value.location,
-                                        plotWidth: plotWidth,
-                                        runtime: runtime
-                                    )
-                                }
-                        )
+                    }
+                    .position(
+                        x: xPosition(for: stop.runtime, plotWidth: plotWidth, runtime: runtime),
+                        y: yPosition(for: stop.depth, plotHeight: plotHeight, maxDepthMetric: maxDepthMetric)
+                    )
+                    .contentShape(Rectangle())
+                    .gesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { value in
+                                activeDecoStopID = stop.id
+                                updateDecoStop(
+                                    stop,
+                                    location: value.location,
+                                    plotWidth: plotWidth,
+                                    runtime: runtime
+                                )
+                            }
+                            .onEnded { _ in
+                                activeDecoStopID = nil
+                            }
+                    )
+                }
+
+                if let activeStop = activeDecoStop {
+                    statusBubble(
+                        text: decoStatusText(for: activeStop),
+                        x: xPosition(for: activeStop.runtime, plotWidth: plotWidth, runtime: runtime),
+                        y: yPosition(for: activeStop.depth, plotHeight: plotHeight, maxDepthMetric: maxDepthMetric) - 32
+                    )
                 }
             }
             .frame(height: chartHeight)
@@ -685,6 +721,20 @@ struct VisualPlannerView: View {
         let adjustedRuntime = max(minimumRuntime, draggedRuntime)
         let extraTime = adjustedRuntime - minimumRuntime
         onDecoExtensionChange(stop.depth, extraTime)
+    }
+
+    @ViewBuilder
+    private func statusBubble(text: String, x: CGFloat, y: CGFloat) -> some View {
+        Text(text)
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(
+                Capsule()
+                    .fill(OVMTheme.danger)
+            )
+            .position(x: x, y: max(18, y))
     }
 
     private func addWaypoint(at location: CGPoint, plotWidth: CGFloat, plotHeight: CGFloat, runtime: Double, maxDepthMetric: Double) {
@@ -828,9 +878,24 @@ struct VisualPlannerView: View {
                 depth: stop.depth,
                 arrivalRuntime: max(result.bottomRuntime, stop.runtime - stop.stopTime),
                 runtime: stop.runtime,
-                autoStopTime: stop.autoStopTime
+                autoStopTime: stop.autoStopTime,
+                stopTime: stop.stopTime,
+                extraTime: stop.extraTime
             )
         }
+    }
+
+    private var activeDecoStop: DecoStopLayout? {
+        guard let activeDecoStopID else { return nil }
+        return decoStopLayouts.first(where: { $0.id == activeDecoStopID })
+    }
+
+    private func decoStatusText(for stop: DecoStopLayout) -> String {
+        let depthText = depthLabel(for: stop.depth)
+        if stop.extraTime > 0 {
+            return "\(depthText) stop: \(Int(stop.stopTime.rounded())) min total (\(Int(stop.extraTime.rounded())) min manual)"
+        }
+        return "\(depthText) stop: \(Int(stop.stopTime.rounded())) min auto"
     }
 
     private func deduplicated(_ points: [RuntimeDepthPoint]) -> [RuntimeDepthPoint] {
@@ -863,6 +928,8 @@ private struct DecoStopLayout: Identifiable {
     let arrivalRuntime: Double
     let runtime: Double
     let autoStopTime: Double
+    let stopTime: Double
+    let extraTime: Double
 
     var id: String { "\(Int(depth.rounded()))-\(Int(arrivalRuntime.rounded()))" }
 }

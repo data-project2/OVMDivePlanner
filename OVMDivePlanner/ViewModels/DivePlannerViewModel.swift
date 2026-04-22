@@ -143,6 +143,9 @@ class DivePlannerViewModel: ObservableObject {
     func setManualDecoExtension(depth: Double, extraTime: Double) {
         let key = String(Int(depth.rounded()))
         let normalized = max(0, extraTime.rounded())
+        let existing = manualDecoStopExtensions[key] ?? 0
+
+        guard existing != normalized else { return }
 
         if normalized == 0 {
             manualDecoStopExtensions.removeValue(forKey: key)
