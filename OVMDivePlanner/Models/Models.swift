@@ -153,7 +153,7 @@ struct DivePlanInput: Codable {
     var setpointLow:         Double = 0.7
     var setpointHigh:        Double = 1.3
     var setpointSwitchDepth: Double = 6
-    var setpointDeco:        Double = 1.3
+    var setpointDeco:        Double = 1.6
     var diluent:             GasMix = .air
 }
 
