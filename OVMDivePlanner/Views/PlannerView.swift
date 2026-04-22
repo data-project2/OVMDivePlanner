@@ -261,6 +261,7 @@ struct GasPickerRow: View {
         case o2 = "O₂ 100%"
         case tx2135 = "Tx 21/35"
         case tx1845 = "Tx 18/45"
+        case tx1555 = "Tx 15/55"
         case custom = "Custom"
     }
 
@@ -394,6 +395,7 @@ struct GasPickerRow: View {
         case .o2:    gas = GasMix(id: gas.id, fO2: 1.00, fHe: 0.0, switchDepth: nil)
         case .tx2135: gas = GasMix(id: gas.id, fO2: 0.21, fHe: 0.35, switchDepth: nil)
         case .tx1845: gas = GasMix(id: gas.id, fO2: 0.18, fHe: 0.45, switchDepth: nil)
+        case .tx1555: gas = GasMix(id: gas.id, fO2: 0.15, fHe: 0.55, switchDepth: nil)
         case .custom: return
         }
     }
@@ -407,6 +409,7 @@ struct GasPickerRow: View {
         case (1.00, 0.0): return .o2
         case (0.21, 0.35): return .tx2135
         case (0.18, 0.45): return .tx1845
+        case (0.15, 0.55): return .tx1555
         default: return .custom
         }
     }
