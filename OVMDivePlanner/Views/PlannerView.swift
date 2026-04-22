@@ -8,6 +8,8 @@ enum PlannerEditorMode: String, CaseIterable {
     case visual = "Visual"
 }
 
+private let plannerMaxDepthMetric = 200.0
+
 struct PlannerView: View {
     @EnvironmentObject private var vm: DivePlannerViewModel
     @State private var showCCRSettings = false
@@ -133,7 +135,12 @@ struct LevelRow: View {
     let unitSystem: UnitSystem
 
     private var depthChoices: [Int] {
-        unitSystem == .metric ? Array(0...300) : Array(stride(from: 0, through: 1000, by: 10))
+        if unitSystem == .metric {
+            return Array(0...Int(plannerMaxDepthMetric))
+        }
+
+        let maxImperialDepth = Int((plannerMaxDepthMetric * 3.28084).rounded())
+        return Array(stride(from: 0, through: maxImperialDepth, by: 10))
     }
 
     private var displayedDepth: Binding<Double> {
@@ -143,7 +150,7 @@ struct LevelRow: View {
                 let nearest = depthChoices.min { abs(Double($0) - displayDepth) < abs(Double($1) - displayDepth) } ?? 0
                 return Double(nearest)
             },
-            set: { level.depth = unitSystem.normalizeMetricProfileDepth(unitSystem.metricDepth($0)) }
+            set: { level.depth = unitSystem.normalizeMetricProfileDepth(min(unitSystem.metricDepth($0), plannerMaxDepthMetric)) }
         )
     }
 
@@ -623,14 +630,14 @@ struct VisualPlannerView: View {
         let depthFraction = Double((clampedY - topInset) / plotHeight)
         let metricDepth = depthFraction * maxDepthMetric
 
-        levels[index].depth = unitSystem.normalizeMetricProfileDepth(metricDepth)
+        levels[index].depth = unitSystem.normalizeMetricProfileDepth(min(metricDepth, plannerMaxDepthMetric))
         levels[index].time = holdTime.rounded()
     }
 
     private func addWaypoint(at location: CGPoint, plotWidth: CGFloat, plotHeight: CGFloat, runtime: Double, maxDepthMetric: Double) {
         let clampedY = min(max(location.y, topInset), topInset + plotHeight)
         let depthFraction = Double((clampedY - topInset) / plotHeight)
-        let metricDepth = unitSystem.normalizeMetricProfileDepth(depthFraction * maxDepthMetric)
+        let metricDepth = unitSystem.normalizeMetricProfileDepth(min(depthFraction * maxDepthMetric, plannerMaxDepthMetric))
         let insertIndex = insertionIndex(for: location.x, plotWidth: plotWidth, runtime: runtime)
         let waypoint = DiveLevel(depth: metricDepth, time: defaultHoldTime)
         levels.insert(waypoint, at: insertIndex)
@@ -643,7 +650,7 @@ struct VisualPlannerView: View {
     }
 
     private func appendWaypoint() {
-        let lastDepth = levels.last?.depth ?? 0
+        let lastDepth = min(levels.last?.depth ?? 0, plannerMaxDepthMetric)
         levels.append(DiveLevel(depth: lastDepth, time: defaultHoldTime))
     }
 
@@ -672,7 +679,7 @@ struct VisualPlannerView: View {
     private var chartMaxDepthMetric: Double {
         let deepestWaypoint = levels.map(\.depth).max() ?? 0
         let deepestOverlay = decoOverlayPoints.map(\.depth).max() ?? 0
-        return max(minimumMetricChartDepth, max(deepestWaypoint, deepestOverlay) + 30)
+        return min(plannerMaxDepthMetric, max(minimumMetricChartDepth, max(deepestWaypoint, deepestOverlay) + 30))
     }
 
     private var totalRuntime: Double {
