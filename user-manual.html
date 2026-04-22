@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OVM Dive Planner User Manual</title>
+    <style>
+        :root {
+            --bg: #0f1c30;
+            --panel: #182742;
+            --panel-2: #203556;
+            --text: #e3ebf5;
+            --muted: #aec0d6;
+            --accent: #5bcefa;
+            --border: #35527b;
+            --warning: #ffd166;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(180deg, #0b1628 0%, var(--bg) 100%);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .wrap {
+            width: min(980px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 32px 0 64px;
+        }
+
+        header {
+            margin-bottom: 28px;
+            padding: 28px;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: rgba(24, 39, 66, 0.92);
+        }
+
+        h1, h2, h3 {
+            line-height: 1.2;
+            margin: 0 0 14px;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 4vw, 3rem);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-top: 0;
+        }
+
+        h3 {
+            font-size: 1.05rem;
+        }
+
+        p, li {
+            color: var(--muted);
+        }
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            background: rgba(91, 206, 250, 0.08);
+            border: 1px solid rgba(91, 206, 250, 0.18);
+            color: var(--text);
+            padding: 0.1rem 0.35rem;
+            border-radius: 6px;
+        }
+
+        .toc,
+        section,
+        .notice {
+            margin-bottom: 18px;
+            padding: 22px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: rgba(24, 39, 66, 0.88);
+        }
+
+        .toc ul,
+        section ul,
+        section ol {
+            margin: 10px 0 0 20px;
+            padding: 0;
+        }
+
+        .toc a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        .card {
+            padding: 16px;
+            border-radius: 12px;
+            background: var(--panel-2);
+            border: 1px solid var(--border);
+        }
+
+        .notice {
+            border-color: rgba(255, 209, 102, 0.35);
+            background: rgba(255, 209, 102, 0.08);
+        }
+
+        .notice strong {
+            color: var(--warning);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        footer {
+            margin-top: 28px;
+            color: var(--muted);
+            text-align: center;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <header>
+            <p class="muted">OVM Dive Planner</p>
+            <h1>User Manual</h1>
+            <p>
+                OVM Dive Planner is an iOS dive-planning app for open-circuit and CCR dives.
+                It calculates decompression schedules using a Bühlmann ZH-L16C model with
+                gradient factors and includes gas planning tools such as deco gas handling,
+                repetitive-dive carry-over, and a gas mixer.
+            </p>
+        </header>
+
+        <div class="notice">
+            <strong>Safety Notice</strong>
+            <p>
+                OVM Dive Planner is a planning tool. It does not replace formal dive training,
+                certified dive procedures, or in-water monitoring with suitable instruments.
+                Every plan should be independently reviewed before use.
+            </p>
+        </div>
+
+        <nav class="toc" aria-label="Table of contents">
+            <h2>Contents</h2>
+            <ul>
+                <li><a href="#overview">1. App Overview</a></li>
+                <li><a href="#planner">2. Planning a Dive</a></li>
+                <li><a href="#visual">3. Using the Visual Planner</a></li>
+                <li><a href="#results">4. Reading the Schedule</a></li>
+                <li><a href="#settings">5. Settings</a></li>
+                <li><a href="#repetitive">6. Repetitive Dives</a></li>
+                <li><a href="#mixer">7. Gas Mixer</a></li>
+                <li><a href="#warnings">8. Warnings and Validation</a></li>
+                <li><a href="#tips">9. Practical Tips</a></li>
+            </ul>
+        </nav>
+
+        <section id="overview">
+            <h2>1. App Overview</h2>
+            <p>The app is organized into four main tabs:</p>
+            <div class="grid">
+                <div class="card">
+                    <h3>Plan</h3>
+                    <p>Create the dive profile, select circuit type, assign bottom gas and deco gases, and calculate the dive.</p>
+                </div>
+                <div class="card">
+                    <h3>Schedule</h3>
+                    <p>Review the decompression schedule, runtime, gas usage, CNS, OTU, and warnings.</p>
+                </div>
+                <div class="card">
+                    <h3>Mixer</h3>
+                    <p>Use the gas mixer tools for pressure transfer, top-off blending, and trimix fill calculations.</p>
+                </div>
+                <div class="card">
+                    <h3>Settings</h3>
+                    <p>Configure units, water type, rates, SAC, gradient factors, last stop depth, and other planner defaults.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="planner">
+            <h2>2. Planning a Dive</h2>
+            <ol>
+                <li>Open the <code>Plan</code> tab.</li>
+                <li>Select <code>Open Circuit</code> or <code>CCR</code> in the <code>Circuit</code> section.</li>
+                <li>Choose a planning mode:
+                    <ul>
+                        <li><code>Visual</code> for chart-based waypoint editing</li>
+                        <li><code>List</code> for discrete depth/time levels</li>
+                    </ul>
+                </li>
+                <li>Enter the dive profile.</li>
+                <li>Select the bottom gas or diluent.</li>
+                <li>Add any deco gases if required.</li>
+                <li>Tap <code>Plan Dive</code>.</li>
+            </ol>
+
+            <p>The planner supports:</p>
+            <ul>
+                <li>multi-level profiles</li>
+                <li>trimix and helium-based gases</li>
+                <li>automatic or manual deco gas switch depths</li>
+                <li>metric and imperial units</li>
+                <li>persistent planner settings between launches</li>
+            </ul>
+        </section>
+
+        <section id="visual">
+            <h2>3. Using the Visual Planner</h2>
+            <p>The visual planner is the default planning mode.</p>
+            <ul>
+                <li>The vertical axis represents depth, with the surface at the top.</li>
+                <li>The horizontal axis represents runtime.</li>
+                <li>Tap the chart to add a new waypoint.</li>
+                <li>Drag a waypoint vertically to change depth.</li>
+                <li>Adjust hold time using the waypoint controls below the chart.</li>
+                <li>The chart expands automatically as the profile grows in depth or time.</li>
+            </ul>
+
+            <h3>List Planner</h3>
+            <p>
+                If you switch to <code>List</code> mode, each level is entered as a depth and time pair.
+                Both list and visual modes edit the same underlying dive profile.
+            </p>
+        </section>
+
+        <section id="results">
+            <h2>4. Reading the Schedule</h2>
+            <p>After calculation, the <code>Schedule</code> tab shows:</p>
+            <ul>
+                <li><strong>Max Depth</strong></li>
+                <li><strong>Bottom Runtime</strong></li>
+                <li><strong>Total Runtime</strong></li>
+                <li><strong>Total Stop Time</strong></li>
+                <li><strong>First Stop</strong></li>
+                <li><strong>Average Depth</strong></li>
+                <li><strong>CNS%</strong></li>
+                <li><strong>OTU</strong></li>
+            </ul>
+
+            <p>The schedule also includes:</p>
+            <ul>
+                <li>a table of decompression stops</li>
+                <li>runtime at each stop</li>
+                <li>planned gas for each stop</li>
+                <li>estimated gas usage by mix</li>
+            </ul>
+
+            <p>
+                If the dive does not require decompression, the schedule will explicitly state
+                <code>No decompression required</code>.
+            </p>
+        </section>
+
+        <section id="settings">
+            <h2>5. Settings</h2>
+            <p>The <code>Settings</code> tab controls global planner behavior.</p>
+            <ul>
+                <li><strong>Units:</strong> Metric or Imperial</li>
+                <li><strong>Water Type:</strong> Salt or Fresh</li>
+                <li><strong>Surface Pressure</strong></li>
+                <li><strong>GF Low / GF High</strong></li>
+                <li><strong>Descent Rate / Ascent Rate</strong></li>
+                <li><strong>Bottom SAC / Deco SAC</strong></li>
+                <li><strong>Last Stop Depth</strong></li>
+                <li><strong>Descent Time Included in Bottom Time</strong></li>
+            </ul>
+
+            <h3>CCR Settings</h3>
+            <p>If <code>CCR</code> is selected in the planner, a separate CCR settings sheet is available for:</p>
+            <ul>
+                <li>low setpoint</li>
+                <li>high setpoint</li>
+                <li>deco setpoint</li>
+                <li>switch depth to the high setpoint</li>
+                <li>CCR bailout/deco gases</li>
+            </ul>
+
+            <p>Settings are stored between launches.</p>
+        </section>
+
+        <section id="repetitive">
+            <h2>6. Repetitive Dives</h2>
+            <p>The planner can model a second dive after a surface interval.</p>
+            <ol>
+                <li>Expand the <code>Repetitive Dive</code> section in the planner.</li>
+                <li>Enable repetitive-dive mode.</li>
+                <li>Enter the surface interval.</li>
+                <li>Define the second dive profile and gases.</li>
+                <li>Calculate the plan.</li>
+            </ol>
+
+            <p>
+                The app carries tissue loading, CNS, and OTU from the first dive into the second dive calculation.
+            </p>
+        </section>
+
+        <section id="mixer">
+            <h2>7. Gas Mixer</h2>
+            <p>The <code>Mixer</code> tab contains three calculators:</p>
+            <div class="grid">
+                <div class="card">
+                    <h3>Tank Fill (Boost)</h3>
+                    <p>Calculates the final pressure after transferring gas from a donor tank into a target tank.</p>
+                </div>
+                <div class="card">
+                    <h3>Top-Off Blend</h3>
+                    <p>Calculates the final mix after topping off a starting mix with a chosen fill gas.</p>
+                </div>
+                <div class="card">
+                    <h3>Trimix Mix</h3>
+                    <p>Calculates required oxygen, helium, and air pressures to produce a target trimix.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="warnings">
+            <h2>8. Warnings and Validation</h2>
+            <p>The app displays warnings for conditions such as:</p>
+            <ul>
+                <li>bottom gas ppO₂ above the warning threshold</li>
+                <li>hypoxic bottom mix at the surface</li>
+                <li>deco gas switch depths that exceed the configured ppO₂ limit</li>
+                <li>very long stop conditions or unresolved ceilings</li>
+            </ul>
+
+            <p>
+                Warnings appear in the schedule view. They are intended to flag conditions that require review before the plan is used.
+            </p>
+        </section>
+
+        <section id="tips">
+            <h2>9. Practical Tips</h2>
+            <ul>
+                <li>Review all gas fractions and switch depths before calculating.</li>
+                <li>Use the visual planner for quick profile shaping and the list planner for precise level entry.</li>
+                <li>Check <code>CNS</code>, <code>OTU</code>, and gas usage on every decompression dive.</li>
+                <li>Verify repetitive-dive settings carefully, especially surface interval and second-dive gases.</li>
+                <li>Re-check settings after switching between metric and imperial units.</li>
+                <li>Use the mixer tools separately from the planner when preparing gas fills.</li>
+            </ul>
+        </section>
+
+        <footer>
+            <p>OVM Dive Planner User Manual</p>
+        </footer>
+    </div>
+</body>
+</html>
