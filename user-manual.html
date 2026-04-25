@@ -75,7 +75,8 @@
 
         .toc,
         section,
-        .notice {
+        .notice,
+        .disclaimer {
             margin-bottom: 18px;
             padding: 22px;
             border: 1px solid var(--border);
@@ -122,6 +123,25 @@
             color: var(--warning);
         }
 
+        .disclaimer {
+            border-color: rgba(255, 66, 66, 0.35);
+            background: rgba(255, 66, 66, 0.08);
+        }
+
+        .disclaimer strong {
+            color: #ff4242;
+        }
+
+        .disclaimer ul {
+            margin: 10px 0 0 20px;
+            padding: 0;
+        }
+
+        .disclaimer li {
+            margin-bottom: 8px;
+            color: var(--muted);
+        }
+
         .muted {
             color: var(--muted);
         }
@@ -147,12 +167,32 @@
             </p>
         </header>
 
+        <div class="disclaimer">
+            <strong>Disclaimer</strong>
+            <ul>
+                <li>This software is provided on an "as-is" basis without warranty of any kind, express or implied.</li>
+                <li>The developers and distributors assume no liability for any injuries, damages, or losses resulting from the use of this software.</li>
+                <li>This app is a mathematical planning tool based on theoretical decompression models. It does not account for individual variations in physiology, metabolism, or decompression sickness susceptibility.</li>
+                <li>The app does not assess your physical fitness, health status, or medical conditions that may affect diving safety. Consult a dive medicine physician before diving if you have any health concerns.</li>
+                <li>The app does not evaluate your mental or psychological state, including fatigue, stress, anxiety, or alertness. You must ensure you are physically and mentally fit before diving.</li>
+                <li>The app does not account for environmental conditions such as water temperature, visibility, currents, weather, sea state, bottom composition, or other site-specific hazards.</li>
+                <li>The app does not consider your experience level, familiarity with your equipment, or your proficiency with the planned dive profile.</li>
+                <li>The app does not monitor actual underwater conditions, your real-time physiological state, or equipment performance during the dive.</li>
+                <li>Decompression calculations are theoretical approximations. Real-world physiology varies significantly between individuals. Follow conservative dive practices and your dive computer.</li>
+                <li>Diving is an inherently dangerous activity that requires proper training, certification, and appropriate equipment.</li>
+                <li>You must obtain formal training and certification from qualified instructors before diving.</li>
+                <li>You must use appropriate equipment and materials for the specific dive profile you intend to execute.</li>
+                <li>A functioning dive computer is mandatory for all dives and must be used as your primary depth and time reference.</li>
+                <li>The user assumes all responsibility and risk associated with diving activities and the use of this software.</li>
+            </ul>
+        </div>
+
         <div class="notice">
             <strong>Safety Notice</strong>
             <p>
-                OVM Dive Planner is a planning tool. It does not replace formal dive training,
-                certified dive procedures, or in-water monitoring with suitable instruments.
-                Every plan should be independently reviewed before use.
+                OVM Dive Planner is a planning aid only and does not replace professional judgment, formal training,
+                formalized dive procedures, or real-time in-water monitoring with a dive computer. All dive plans
+                must be independently reviewed and verified by qualified, experienced divers before execution.
             </p>
         </div>
 
@@ -341,7 +381,7 @@
             </ul>
 
             <p>
-                Warnings appear in the schedule view. They are intended to flag conditions that require review before the plan is used.
+                Warnings appear in the schedule view. They are intended to flag conditions that require review before the plan is used.  Adjust your plan accordingly before the dive. Do not dive beyond your training and material limits
             </p>
         </section>
 
