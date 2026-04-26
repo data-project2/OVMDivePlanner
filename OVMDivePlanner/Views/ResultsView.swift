@@ -225,9 +225,10 @@ struct DiveProfileTable: View {
 
         for level in levels.prefix(index + 1) {
             let diff = abs(level.depth - currentDepth)
-            let rate = level.depth >= currentDepth ? descentRate : ascentRate
+            let isDescent = level.depth > currentDepth
+            let rate = isDescent ? descentRate : ascentRate
             let transitTime = diff > 0 ? diff / rate : 0
-            let bottomTime = transitInclusive ? max(0, level.time - transitTime) : level.time
+            let bottomTime = (isDescent && transitInclusive) ? max(0, level.time - transitTime) : level.time
 
             runtime += transitTime + bottomTime
             currentDepth = level.depth
