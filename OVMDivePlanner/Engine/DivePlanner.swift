@@ -5,6 +5,7 @@
 import Foundation
 
 private let STOP_INCREMENT = 3.0
+private let DECO_CHECK_STEP = 20.0 / 60.0
 
 // MARK: - Helper functions
 
@@ -261,15 +262,15 @@ func planDive(input: DivePlanInput, initialTissues: TissueState? = nil,
 
                 let ceilBar = tissues.ceiling(gf: clearanceGF)
                 let ceilD = pressureToDepth(ceilBar, surfP, wdf)
-                let reqStop = ceilToStop(max(0, ceilD))
-                if isLast ? reqStop <= 0 : reqStop < sd { break }
-                tissues.applyConstant(ambient: pStop, fN2: g.fN2, fHe: g.fHe, time: 1)
-                stopTime += 1; runtime += 1
+                let nextAllowedDepth = isLast ? 0.0 : sd - STOP_INCREMENT
+                if ceilD <= nextAllowedDepth { break }
+                tissues.applyConstant(ambient: pStop, fN2: g.fN2, fHe: g.fHe, time: DECO_CHECK_STEP)
+                stopTime += DECO_CHECK_STEP; runtime += DECO_CHECK_STEP
                 if stopTime > 999 { warnings.append("Stop at \(Int(sd))m exceeded 999 min."); break }
             }
 
             if stopTime > 0 {
-                schedule.append(DecoStop(depth: sd, stopTime: stopTime, runtime: ceil(runtime), gas: glabel))
+                schedule.append(DecoStop(depth: sd, stopTime: ceil(stopTime), runtime: ceil(runtime), gas: glabel))
                 addUsage(glabel, sd, stopTime, input.sacDeco)
                 trackSeg(sd, stopTime, ppO2At(sd, "deco"))
             }
@@ -446,15 +447,15 @@ func computeBailout(tissues: TissueState, depth: Double, preparedDeco: [Prepared
                 let clearanceGF = isLast ? gfH : gf
 
                 let ceilD = pressureToDepth(tissues.ceiling(gf: clearanceGF), surfP, wdf)
-                let req = ceilToStop(max(0, ceilD))
-                if isLast ? req <= 0 : req < sd { break }
-                tissues.applyConstant(ambient: pStop, fN2: g.fN2, fHe: g.fHe, time: 1)
-                stopTime += 1; runtime += 1
+                let nextAllowedDepth = isLast ? 0.0 : sd - STOP_INCREMENT
+                if ceilD <= nextAllowedDepth { break }
+                tissues.applyConstant(ambient: pStop, fN2: g.fN2, fHe: g.fHe, time: DECO_CHECK_STEP)
+                stopTime += DECO_CHECK_STEP; runtime += DECO_CHECK_STEP
                 if stopTime > 999 { warnings.append("Bailout stop at \(Int(sd))m exceeded 999 min."); break }
             }
 
             if stopTime > 0 {
-                schedule.append(DecoStop(depth: sd, stopTime: stopTime, runtime: ceil(runtime), gas: g.label))
+                schedule.append(DecoStop(depth: sd, stopTime: ceil(stopTime), runtime: ceil(runtime), gas: g.label))
                 addUsage(g.label, sd, stopTime, sacDeco)
                 trackSeg(sd, stopTime, g.fO2)
             }
